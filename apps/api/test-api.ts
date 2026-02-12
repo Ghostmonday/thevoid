@@ -1,4 +1,4 @@
-   // Test script for the API
+// Test script for the API
 // Run this after starting the server: pnpm --filter api dev
 
 const API_URL = 'http://localhost:3000';
@@ -21,6 +21,7 @@ async function testApi() {
                 id: contributionId,
                 streamId: user1Id,
                 type: 'CONTRIBUTION_SUBMITTED',
+                timestamp: '2026-01-15T10:00:00.000Z',
                 payload: {
                     userId: user1Id,
                     url: 'https://github.com/test/project',
@@ -41,6 +42,7 @@ async function testApi() {
                 id: '550e8400-e29b-41d4-a716-446655440004',
                 streamId: user2Id,
                 type: 'VERIFICATION_SUBMITTED',
+                timestamp: '2026-01-15T11:00:00.000Z',
                 payload: {
                     verifierId: user2Id,
                     targetContributionId: contributionId,

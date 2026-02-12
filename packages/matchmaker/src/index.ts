@@ -1,4 +1,4 @@
-import { SystemState } from '@fated/xp-logic';
+import { SystemState, XpVector } from '@fated/xp-logic';
 import { UserId } from '@fated/types';
 
 export type PartyRole = 'ARCHITECT' | 'GUARDIAN' | 'BUILDER';
@@ -14,10 +14,10 @@ export type AdventuringParty = {
     totalPower: number;
 };
 
-export const formParty = (state: SystemState): AdventuringParty => {
+export const formParty = (state: SystemState, now: Date = new Date()): AdventuringParty => {
     const activeUsers = Object.entries(state).filter(([_, xp]) => {
         if (!xp.lastActivity) return false;
-        const daysSilent = (new Date().getTime() - xp.lastActivity.getTime()) / (1000 * 3600 * 24);
+        const daysSilent = (now.getTime() - xp.lastActivity.getTime()) / (1000 * 3600 * 24);
         return daysSilent < 30;
     });
 
@@ -25,7 +25,7 @@ export const formParty = (state: SystemState): AdventuringParty => {
 
     const pickBest = (
         role: PartyRole,
-        scorer: (xp: any) => number
+        scorer: (xp: XpVector) => number
     ): PartyMember | null => {
         let bestId: string | null = null;
         let bestScore = -1;

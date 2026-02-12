@@ -1,8 +1,8 @@
-import Fastify from 'fastify';
-import { calculateState } from '@fated/xp-logic';
+import Fastify, { FastifyRequest } from 'fastify';
+import { randomUUID } from 'crypto';
+import { calculateState, XpVector } from '@fated/xp-logic';
 import { formParty } from '@fated/matchmaker';
-import { AppEvent } from '@fated/events';
-import crypto from 'crypto';
+import { AppEvent, ContributionSubmittedSchema, VerificationSubmittedSchema } from '@fated/events';
 
 const fastify = Fastify({ logger: true });
 
@@ -10,26 +10,22 @@ const fastify = Fastify({ logger: true });
 const EVENTS: AppEvent[] = [];
 
 // POST /contribute
-fastify.post('/contribute', async (request: any, reply) => {
-    const body = request.body as any;
+fastify.post<{ Body: AppEvent }>('/contribute', async (request: FastifyRequest<{ Body: AppEvent }>, reply) => {
+    const result = ContributionSubmittedSchema.safeParse(request.body);
 
-    // Validate required fields manually
-    if (!body || !body.payload || !body.payload.userId || !body.payload.url) {
-        return reply.status(400).send({
-            error: 'Invalid contribution payload',
-            details: { fieldErrors: { payload: ['Required: userId, url, etc.'] } }
-        });
+    if (!result.success) {
+        return reply.status(400).send({ error: 'Invalid contribution payload', details: result.error.flatten() });
     }
 
     const event: AppEvent = {
-        id: body.id || crypto.randomUUID(),
-        streamId: body.streamId || body.payload.userId,
-        timestamp: body.timestamp ? new Date(body.timestamp) : new Date(),
+        id: result.data.id,
+        streamId: result.data.streamId,
+        timestamp: result.data.timestamp,
         type: 'CONTRIBUTION_SUBMITTED',
         payload: {
-            userId: body.payload.userId,
-            url: body.payload.url,
-            complexityScore: body.payload.complexityScore,
+            userId: result.data.payload.userId,
+            url: result.data.payload.url,
+            complexityScore: result.data.payload.complexityScore,
         },
     };
 
@@ -43,26 +39,23 @@ fastify.post('/contribute', async (request: any, reply) => {
 });
 
 // POST /verify
-fastify.post('/verify', async (request: any, reply) => {
-    const body = request.body as any;
+fastify.post<{ Body: AppEvent }>('/verify', async (request: FastifyRequest<{ Body: AppEvent }>, reply) => {
+    const result = VerificationSubmittedSchema.safeParse(request.body);
 
-    if (!body || !body.payload || !body.payload.verifierId || !body.payload.targetContributionId) {
-        return reply.status(400).send({
-            error: 'Invalid verification payload',
-            details: { fieldErrors: { payload: ['Required: verifierId, targetContributionId, verdict'] } }
-        });
+    if (!result.success) {
+        return reply.status(400).send({ error: 'Invalid verification payload', details: result.error.flatten() });
     }
 
     const event: AppEvent = {
-        id: body.id || crypto.randomUUID(),
-        streamId: body.streamId || body.payload.verifierId,
-        timestamp: body.timestamp ? new Date(body.timestamp) : new Date(),
+        id: result.data.id,
+        streamId: result.data.streamId,
+        timestamp: result.data.timestamp,
         type: 'VERIFICATION_SUBMITTED',
         payload: {
-            verifierId: body.payload.verifierId,
-            targetContributionId: body.payload.targetContributionId,
-            verdict: body.payload.verdict || 'APPROVE',
-            qualityScore: body.payload.qualityScore,
+            verifierId: result.data.payload.verifierId,
+            targetContributionId: result.data.payload.targetContributionId,
+            verdict: result.data.payload.verdict,
+            qualityScore: result.data.payload.qualityScore,
         },
     };
 
@@ -80,14 +73,14 @@ fastify.get('/leaderboard', async () => {
     const state = calculateState(EVENTS);
 
     const leaderboard = Object.entries(state)
-        .map(([userId, xp]: [string, any]) => ({
+        .map(([userId, xp]: [string, XpVector]) => ({
             userId,
             totalXP: xp.total,
             pendingXP: xp.pending,
             contributions: xp.contributions,
             lastActivity: xp.lastActivity
         }))
-        .sort((a: any, b: any) => b.totalXP - a.totalXP);
+        .sort((a, b) => b.totalXP - a.totalXP);
 
     return { leaderboard };
 });
@@ -98,7 +91,7 @@ fastify.get('/team', async () => {
     const party = formParty(state);
 
     return {
-        team: party.members.map((m: any) => ({
+        team: party.members.map((m) => ({
             userId: m.userId,
             role: m.role,
             score: m.score
