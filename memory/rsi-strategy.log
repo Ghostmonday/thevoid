@@ -1,0 +1,15 @@
+# RSI Strategy Performance Log
+Created: 2026-02-11T19:45:00-08:00
+
+## Strategy Selection Criteria
+- API Success Rate: Jobs with lastStatus="ok" / Total jobs
+- File Success Rate: Direct file operations (self-heal) success rate
+- A/B Testing: 10% random exploration of alternative approach
+
+## Current Strategy: api
+- Rationale: Equal performance (50%/50%), maintaining default API-first approach
+- Threshold: 80%
+- Adaptive Mode: Pending (needs 10 predictions)
+
+---
+[2026-02-11T19:50:30-08:00] Strategy: api | API: 50% | File: 50% | Decision: Equal performance - maintaining default API approach
