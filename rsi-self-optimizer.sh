@@ -138,8 +138,8 @@ sed -i "s/API_SUCCESS_RATE=.*/API_SUCCESS_RATE=$API_SUCCESS_RATE/" "$THRESHOLD_C
 sed -i "s/FILE_SUCCESS_RATE=.*/FILE_SUCCESS_RATE=$FILE_SUCCESS_RATE/" "$THRESHOLD_CONFIG" 2>/dev/null || echo "FILE_SUCCESS_RATE=$FILE_SUCCESS_RATE" >> "$THRESHOLD_CONFIG"
 
 # Update scorecard with strategy info
-sed -i "s/Active Strategy:.*/Active Strategy: $BEST_STRATEGY (API: ${API_SUCCESS_RATE}% | File: ${FILE_SUCCESS_RATE}%)/" "$SCORECARD" 2>/dev/null || true
-sed -i "s/Strategy Selection:.*/Strategy Selection: ✅ Active - $STRATEGY_DECISION/" "$SCORECARD" 2>/dev/null || true
+sed -i "s|Active Strategy:.*|Active Strategy: $BEST_STRATEGY (API: ${API_SUCCESS_RATE}% | File: ${FILE_SUCCESS_RATE}%)|" "$SCORECARD" 2>/dev/null || true
+sed -i "s|Strategy Selection:.*|Strategy Selection: ✅ Active - $STRATEGY_DECISION|" "$SCORECARD" 2>/dev/null || true
 
 # ========== ADAPTIVE THRESHOLD ==========
 echo ""
@@ -181,7 +181,7 @@ if [ "$PREDICTIONS_TOTAL" -gt "5" ]; then
         
         if [ "$NEW_THRESHOLD" != "$THRESHOLD" ]; then
             echo "Updating threshold config..."
-            sed -i "s/THRESHOLD=.*/THRESHOLD=$NEW_THRESHOLD/" "$THRESHOLD_CONFIG"
+            sed -i "s|THRESHOLD=.*|THRESHOLD=$NEW_THRESHOLD|" "$THRESHOLD_CONFIG"
             THRESHOLD=$NEW_THRESHOLD
         fi
     fi
@@ -190,7 +190,8 @@ else
 fi
 
 # Log auto-actions taken by predictive analyzer
-AUTO_ACTIONS=$(grep -c "TRIGGERED\|Status: TRIGGERED" "$PREDICTIONS_LOG" 2>/dev/null || echo "0")
+AUTO_ACTIONS=$(grep -c "TRIGGERED\|Status: TRIGGERED" "$PREDICTIONS_LOG" 2>/dev/null | tail -1 || echo "0")
+AUTO_ACTIONS=$(echo "$AUTO_ACTIONS" | tr -d '\n')
 sed -i "s/AUTO_ACTION_TRIGGERED=.*/AUTO_ACTION_TRIGGERED=$AUTO_ACTIONS/" "$THRESHOLD_CONFIG"
 
 # Write updated config
@@ -207,9 +208,9 @@ FILE_SUCCESS_RATE=${FILE_SUCCESS_RATE:-0}
 EOF
 
 # Update scorecard
-sed -i "s/THRESHOLD=.*/THRESHOLD=$THRESHOLD%/" "$SCORECARD" 2>/dev/null || true
-sed -i "s/Prediction Accuracy:.*/Prediction Accuracy: ${ACCURACY}% (${PREDICTIONS_CORRECT}\/$PREDICTIONS_TOTAL)/" "$SCORECARD" 2>/dev/null || true
-sed -i "s/Active Strategy:.*/Active Strategy: ${BEST_STRATEGY:-auto} (API: ${API_SUCCESS_RATE}% | File: ${FILE_SUCCESS_RATE}%)/" "$SCORECARD" 2>/dev/null || true
+sed -i "s|THRESHOLD=.*|THRESHOLD=$THRESHOLD|" "$SCORECARD" 2>/dev/null || true
+sed -i "s|Prediction Accuracy:.*|Prediction Accuracy: ${ACCURACY}% (${PREDICTIONS_CORRECT}\/$PREDICTIONS_TOTAL)|" "$SCORECARD" 2>/dev/null || true
+sed -i "s|Active Strategy:.*|Active Strategy: ${BEST_STRATEGY:-auto} (API: ${API_SUCCESS_RATE}% | File: ${FILE_SUCCESS_RATE}%)|" "$SCORECARD" 2>/dev/null || true
 
 echo "=== Self-Optimization Complete ==="
 echo "Current Threshold: ${THRESHOLD}%"

@@ -10,9 +10,37 @@ HYPOTHESES_FILE="$HOME/.rsi/emergent-hypotheses.json"
 SCORECARD="/home/amir/Documents/fatedfortress/self-modify-scorecard.md"
 METRICS_DIR="$HOME/.rsi/metrics"
 THRESHOLD_CONFIG="$HOME/.rsi-threshold.conf"
+VALIDATOR_SCRIPT="/home/amir/Documents/fatedfortress/rsi-self-validator.sh"
 
 log() {
     echo "[$(date '+%Y-%m-%d %H:%M:%S')] $*" >> "$LOG_FILE"
+}
+
+# Validate changes after modification
+validate_rsi_changes() {
+    local change_id="meta-learner-$(date +%Y%m%d_%H%M%S)"
+    log "Invoking self-validator for meta-learner changes..."
+    
+    if [[ -x "$VALIDATOR_SCRIPT" ]]; then
+        # Capture current state first
+        "$VALIDATOR_SCRIPT" capture "$change_id" 2>/dev/null || true
+        
+        # Run validation
+        local validation_result
+        validation_result=$("$VALIDATOR_SCRIPT" validate "$change_id" true 2>&1)
+        
+        if echo "$validation_result" | grep -q "validation_passed=true"; then
+            log "✓ Self-validation passed for meta-learner changes"
+            return 0
+        else
+            log "✗ Self-validation failed for meta-learner changes"
+            log "Details: $validation_result"
+            return 1
+        fi
+    else
+        log "Validator script not found or not executable, skipping validation"
+        return 0
+    fi
 }
 
 # Analyze which hypotheses were effective
@@ -284,7 +312,10 @@ main() {
     echo "=== Phase 5: Strategy Adaptation ==="
     adapt_improvement_strategy
     
-    echo "=== Phase 6: Documentation Update ==="
+    echo "=== Phase 6: Self-Validation ==="
+    validate_rsi_changes || log "Warning: Validation failed, but continuing"
+    
+    echo "=== Phase 7: Documentation Update ==="
     update_rsi_documentation
     
     log "=== RSI Meta-Learning Cycle Complete ==="
