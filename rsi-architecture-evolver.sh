@@ -38,6 +38,7 @@ analyze_performance() {
         recent_validations=$(tail -10 "$METRICS_DIR"/validation-history.json 2>/dev/null || echo "[]")
         local failed_count
         failed_count=$(echo "$recent_validations" | grep -c '"status":"failed"' || echo "0")
+        failed_count=$(echo "$failed_count" | tr -d '[:space:]')
         
         if [[ $failed_count -gt 2 ]]; then
             performance_score=$((performance_score - 20))
@@ -107,6 +108,7 @@ generate_proposal() {
     # Check if cron jobs are optimal
     local job_count
     job_count=$(crontab -l 2>/dev/null | grep -c "rsi-" || echo "0")
+    job_count=$(echo "$job_count" | tr -d '[:space:]')
     if [[ $job_count -lt 5 ]]; then
         changes+=('{"type": "capability", "action": "add_job", "job": "rsi-optimizer", "reason": "Additional optimization capability needed"}')
         confidence=$(echo "$confidence + 0.15" | bc)
@@ -243,7 +245,11 @@ main() {
         log "Proposal generated: $proposal_file"
         
         # Step 4: Implement if confident
-        implement_changes "$proposal_file"
+        if implement_changes "$proposal_file"; then
+            log "Changes implemented successfully"
+        else
+            log "Changes not implemented (confidence threshold not met)"
+        fi
     else
         log "Performance score $score >= 80, no changes needed"
     fi
@@ -255,10 +261,10 @@ main() {
     current_evolution=$(echo "$params" | grep -o '"evolution_rate": [0-9.]*' | cut -d' ' -f2)
     
     # Slowly increase evolution rate if stable
-    if [[ $(echo "$score > 70" | bc -l) -eq 1 ]]; then
+    if echo "$score" | awk '{exit ($1 > 70 ? 0 : 1)}'; then
         local new_evolution
         new_evolution=$(echo "$current_evolution + 0.05" | bc)
-        if [[ $(echo "$new_evolution < 0.5" | bc -l) -eq 1 ]]; then
+        if echo "$new_evolution" | awk '{exit ($1 < 0.5 ? 0 : 1)}'; then
             params=$(echo "$params" | sed "s/\"evolution_rate\": $current_evolution/\"evolution_rate\": $new_evolution/")
             save_params "$params"
             log "Evolved evolution_rate: $current_evolution -> $new_evolution"
