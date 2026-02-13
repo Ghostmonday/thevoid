@@ -14,3 +14,6 @@ export enum Visibility {
   OFF = "OFF",
   ANON = "ANON"
 }
+
+// Specialty domains for domain-aware specialization
+export type Specialty = 'BACKEND' | 'FRONTEND' | 'DEVOPS' | 'SECURITY' | 'RESEARCH';

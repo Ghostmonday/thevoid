@@ -1,79 +1,175 @@
-// Test script for the API
-// Run this after starting the server: pnpm --filter api dev
+import Fastify from 'fastify';
+import { InMemoryEventStore } from '@fated/event-store';
+import { formParty } from '@fated/matchmaker';
 
-const API_URL = 'http://localhost:3000';
+// Create a test Fastify instance
+const fastify = Fastify({ logger: false });
+const store = new InMemoryEventStore();
 
-async function testApi() {
-    console.log('🧪 Testing FatedFortress API...\n');
+// Test helper: create contribution event payload
+function createContributionPayload(userId: string = 'user-1', complexityScore: number = 8) {
+    return {
+        id: crypto.randomUUID(),
+        streamId: userId,
+        type: 'CONTRIBUTION_SUBMITTED' as const,
+        timestamp: new Date().toISOString(),
+        payload: {
+            userId,
+            url: 'https://github.com/test/project',
+            complexityScore,
+        },
+    };
+}
 
-    // Generate some test IDs
-    const user1Id = '550e8400-e29b-41d4-a716-446655440001';
-    const user2Id = '550e8400-e29b-41d4-a716-446655440002';
-    const contributionId = '550e8400-e29b-41d4-a716-446655440003';
+// Register routes for testing
+fastify.post('/contribute', async (request: any, reply) => {
+    const result = store.append(request.body);
+
+    if (!result.ok) {
+        const error = result as { ok: false; error: unknown };
+        return reply.status(400).send({ error: 'Invalid contribution payload', details: error.error });
+    }
+
+    return {
+        success: true,
+        eventId: result.eventId,
+        message: 'Contribution recorded'
+    };
+});
+
+fastify.get('/leaderboard', async (request: any) => {
+    const offset = Number(request.query.offset) || 0;
+    const limit = Number(request.query.limit) || 50;
+
+    const leaderboard = store.getLeaderboard({ offset, limit });
+    const total = store.getUserCount();
+
+    return {
+        leaderboard: leaderboard.map((entry: any) => ({
+            userId: entry.userId,
+            totalXP: entry.total,
+            pendingXP: entry.pending,
+            contributions: entry.contributions,
+            lastActivity: entry.lastActivity
+        })),
+        total
+    };
+});
+
+// Test: POST contribution, then GET leaderboard, assert new XP appears
+async function testContributionAndLeaderboard() {
+    console.log('🧪 Test: Contribution updates leaderboard XP...');
+
+    // Clear store
+    store.clear();
+
+    // Submit a contribution
+    const contribPayload = createContributionPayload('alice', 8);
+
+    const contribResponse = await fastify.inject({
+        method: 'POST',
+        url: '/contribute',
+        payload: contribPayload,
+    });
+
+    if (contribResponse.statusCode !== 200) {
+        throw new Error(`Contribution failed: ${contribResponse.body}`);
+    }
+
+    // Get leaderboard
+    const lbResponse = await fastify.inject({
+        method: 'GET',
+        url: '/leaderboard',
+    });
+
+    const lbResult = JSON.parse(lbResponse.body);
+
+    // Assert XP appears in leaderboard (pending since not yet verified)
+    const aliceEntry = lbResult.leaderboard.find((entry: any) => entry.userId === 'alice');
+    if (!aliceEntry) {
+        throw new Error('Alice not found in leaderboard after contribution');
+    }
+
+    // Contributions add to pending XP, not total
+    if (aliceEntry.pendingXP <= 0) {
+        throw new Error(`Expected positive pending XP, got ${aliceEntry.pendingXP}`);
+    }
+
+    console.log('   ✅ Alice has pending XP in leaderboard:', aliceEntry.pendingXP);
+    return true;
+}
+
+// Test: GET leaderboard?limit=5, assert length is 5 and total is correct
+async function testLeaderboardPagination() {
+    console.log('🧪 Test: Leaderboard pagination...');
+
+    // Clear store
+    store.clear();
+
+    // Create 10 users with contributions
+    for (let i = 0; i < 10; i++) {
+        const payload = createContributionPayload(`user-${i}`, 5 + (i % 5));
+
+        await fastify.inject({
+            method: 'POST',
+            url: '/contribute',
+            payload,
+        });
+    }
+
+    // Get leaderboard with limit=5
+    const lbResponse = await fastify.inject({
+        method: 'GET',
+        url: '/leaderboard?limit=5',
+    });
+
+    const lbResult = JSON.parse(lbResponse.body);
+
+    // Assert length is 5
+    if (lbResult.leaderboard.length !== 5) {
+        throw new Error(`Expected 5 entries, got ${lbResult.leaderboard.length}`);
+    }
+
+    // Assert total is correct (10 users)
+    if (lbResult.total !== 10) {
+        throw new Error(`Expected total=10, got ${lbResult.total}`);
+    }
+
+    console.log('   ✅ Limit=5 returns exactly 5 entries');
+    console.log('   ✅ Total correctly reports 10 users');
+
+    // Test offset with second page
+    const page2Response = await fastify.inject({
+        method: 'GET',
+        url: '/leaderboard?offset=5&limit=5',
+    });
+
+    const page2Result = JSON.parse(page2Response.body);
+
+    if (page2Result.leaderboard.length !== 5) {
+        throw new Error(`Expected 5 entries on page 2, got ${page2Result.leaderboard.length}`);
+    }
+
+    console.log('   ✅ Offset=5 returns entries 6-10');
+    return true;
+}
+
+// Run all tests
+async function runTests() {
+    console.log('🚀 Running FatedFortress API Tests...\n');
 
     try {
-        // 1. Submit a contribution
-        console.log('1. POST /contribute');
-        const contribResponse = await fetch(`${API_URL}/contribute`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                id: contributionId,
-                streamId: user1Id,
-                type: 'CONTRIBUTION_SUBMITTED',
-                timestamp: '2026-01-15T10:00:00.000Z',
-                payload: {
-                    userId: user1Id,
-                    url: 'https://github.com/test/project',
-                    complexityScore: 8,
-                },
-            }),
-        });
-        const contribResult = await contribResponse.json();
-        console.log('   Response:', JSON.stringify(contribResult, null, 2));
-        console.log(`   Status: ${contribResponse.ok ? '✅' : '❌'}\n`);
+        await testContributionAndLeaderboard();
+        console.log('   🎉 Test 1 passed!\n');
 
-        // 2. Submit a verification
-        console.log('2. POST /verify');
-        const verifyResponse = await fetch(`${API_URL}/verify`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                id: '550e8400-e29b-41d4-a716-446655440004',
-                streamId: user2Id,
-                type: 'VERIFICATION_SUBMITTED',
-                timestamp: '2026-01-15T11:00:00.000Z',
-                payload: {
-                    verifierId: user2Id,
-                    targetContributionId: contributionId,
-                    verdict: 'APPROVE',
-                    qualityScore: 5,
-                },
-            }),
-        });
-        const verifyResult = await verifyResponse.json();
-        console.log('   Response:', JSON.stringify(verifyResult, null, 2));
-        console.log(`   Status: ${verifyResponse.ok ? '✅' : '❌'}\n`);
+        await testLeaderboardPagination();
+        console.log('   🎉 Test 2 passed!\n');
 
-        // 3. Get leaderboard
-        console.log('3. GET /leaderboard');
-        const lbResponse = await fetch(`${API_URL}/leaderboard`);
-        const lbResult = await lbResponse.json();
-        console.log('   Response:', JSON.stringify(lbResult, null, 2));
-        console.log(`   Status: ${lbResponse.ok ? '✅' : '❌'}\n`);
-
-        // 4. Get team
-        console.log('4. GET /team');
-        const teamResponse = await fetch(`${API_URL}/team`);
-        const teamResult = await teamResponse.json();
-        console.log('   Response:', JSON.stringify(teamResult, null, 2));
-        console.log(`   Status: ${teamResponse.ok ? '✅' : '❌'}\n`);
-
-        console.log('🎉 All tests complete!');
+        console.log('✅ All tests passed!');
     } catch (error) {
         console.error('❌ Test failed:', error);
-        console.log('\n💡 Make sure the API server is running: pnpm --filter api dev');
+        process.exit(1);
     }
 }
 
-testApi();
+runTests();

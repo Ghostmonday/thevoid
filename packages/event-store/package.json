@@ -1,0 +1,23 @@
+{
+    "name": "@fated/event-store",
+    "version": "0.0.0",
+    "private": true,
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
+    "scripts": {
+        "build": "tsc",
+        "test": "vitest run",
+        "hydrate": "tsx scripts/hydrate-from-memory.ts"
+    },
+    "dependencies": {
+        "@fated/db": "workspace:*",
+        "@fated/events": "workspace:*",
+        "@fated/xp-logic": "workspace:*",
+        "zod": "^3.23.8"
+    },
+    "devDependencies": {
+        "tsx": "^4.19.0",
+        "typescript": "^5.6.3",
+        "vitest": "^2.1.3"
+    }
+}

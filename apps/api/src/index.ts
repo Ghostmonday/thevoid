@@ -1,93 +1,96 @@
-import Fastify, { FastifyRequest } from 'fastify';
+import Fastify, { FastifyRequest, FastifyInstance } from 'fastify';
 import { randomUUID } from 'crypto';
-import { calculateState, XpVector } from '@fated/xp-logic';
 import { formParty } from '@fated/matchmaker';
-import { AppEvent, ContributionSubmittedSchema, VerificationSubmittedSchema } from '@fated/events';
+import { AppEvent } from '@fated/events';
+import { InMemoryEventStore } from '@fated/event-store';
 
 const fastify = Fastify({ logger: true });
 
-// In-Memory Event Store
-const EVENTS: AppEvent[] = [];
+// Global error handler for production resilience
+fastify.setErrorHandler((error: any, request: FastifyRequest, reply: any) => {
+    // Log full error internally for debugging
+    console.error('Error:', error);
 
-// POST /contribute
-fastify.post<{ Body: AppEvent }>('/contribute', async (request: FastifyRequest<{ Body: AppEvent }>, reply) => {
-    const result = ContributionSubmittedSchema.safeParse(request.body);
-
-    if (!result.success) {
-        return reply.status(400).send({ error: 'Invalid contribution payload', details: result.error.flatten() });
+    // Handle Prisma unique constraint violations (P2002)
+    if (error.code === 'P2002') {
+        return reply.status(409).send({ error: 'Resource conflict' });
     }
 
-    const event: AppEvent = {
-        id: result.data.id,
-        streamId: result.data.streamId,
-        timestamp: result.data.timestamp,
-        type: 'CONTRIBUTION_SUBMITTED',
-        payload: {
-            userId: result.data.payload.userId,
-            url: result.data.payload.url,
-            complexityScore: result.data.payload.complexityScore,
-        },
-    };
+    // Handle SQLite errors
+    if (error.message?.includes('SQLITE') || error.code === 'P3000') {
+        return reply.status(500).send({ error: 'Internal storage error' });
+    }
 
-    EVENTS.push(event);
+    // Handle validation errors from Zod
+    if (error.name === 'ZodError') {
+        return reply.status(400).send({ error: 'Validation failed', details: error.errors });
+    }
+
+    // Default: return sanitized error
+    return reply.status(error.statusCode || 500).send({
+        error: error.message || 'Operation failed'
+    });
+});
+
+// In-Memory Event Store with Materialized State
+// Pass hydrate=true to load state from SQLite on startup
+const store = new InMemoryEventStore(true);
+
+// POST /contribute
+fastify.post('/contribute', async (request: FastifyRequest<{ Body: AppEvent }>, reply) => {
+    const result = store.append(request.body);
+
+    if (!result.ok) {
+        const error = result as { ok: false; error: unknown };
+        return reply.status(400).send({ error: 'Invalid contribution payload', details: error.error });
+    }
 
     return {
         success: true,
-        eventId: event.id,
+        eventId: result.eventId,
         message: 'Contribution recorded'
     };
 });
 
 // POST /verify
-fastify.post<{ Body: AppEvent }>('/verify', async (request: FastifyRequest<{ Body: AppEvent }>, reply) => {
-    const result = VerificationSubmittedSchema.safeParse(request.body);
+fastify.post('/verify', async (request: FastifyRequest<{ Body: AppEvent }>, reply) => {
+    const result = store.append(request.body);
 
-    if (!result.success) {
-        return reply.status(400).send({ error: 'Invalid verification payload', details: result.error.flatten() });
+    if (!result.ok) {
+        const error = result as { ok: false; error: unknown };
+        return reply.status(400).send({ error: 'Invalid verification payload', details: error.error });
     }
-
-    const event: AppEvent = {
-        id: result.data.id,
-        streamId: result.data.streamId,
-        timestamp: result.data.timestamp,
-        type: 'VERIFICATION_SUBMITTED',
-        payload: {
-            verifierId: result.data.payload.verifierId,
-            targetContributionId: result.data.payload.targetContributionId,
-            verdict: result.data.payload.verdict,
-            qualityScore: result.data.payload.qualityScore,
-        },
-    };
-
-    EVENTS.push(event);
 
     return {
         success: true,
-        eventId: event.id,
+        eventId: result.eventId,
         message: 'Verification recorded'
     };
 });
 
 // GET /leaderboard
-fastify.get('/leaderboard', async () => {
-    const state = calculateState(EVENTS);
+fastify.get('/leaderboard', async (request: FastifyRequest<{ Querystring: { offset?: string; limit?: string } }>) => {
+    const offset = Number(request.query.offset) || 0;
+    const limit = Number(request.query.limit) || 50;
 
-    const leaderboard = Object.entries(state)
-        .map(([userId, xp]: [string, XpVector]) => ({
-            userId,
-            totalXP: xp.total,
-            pendingXP: xp.pending,
-            contributions: xp.contributions,
-            lastActivity: xp.lastActivity
-        }))
-        .sort((a, b) => b.totalXP - a.totalXP);
+    const leaderboard = store.getLeaderboard({ offset, limit });
+    const total = store.getUserCount();
 
-    return { leaderboard };
+    return {
+        leaderboard: leaderboard.map(entry => ({
+            userId: entry.userId,
+            totalXP: entry.total,
+            pendingXP: entry.pending,
+            contributions: entry.contributions,
+            lastActivity: entry.lastActivity
+        })),
+        total
+    };
 });
 
 // GET /team
 fastify.get('/team', async () => {
-    const state = calculateState(EVENTS);
+    const state = store.getState();
     const party = formParty(state);
 
     return {

@@ -12,11 +12,11 @@
         "@fated/types": "workspace:*",
         "@fated/xp-logic": "workspace:*",
         "@fated/matchmaker": "workspace:*",
-        "@faker-js/faker": "^8.4.1",
         "tsx": "^4.7.1"
     },
     "devDependencies": {
         "@fated/tsconfig": "workspace:*",
+        "@faker-js/faker": "^8.4.1",
         "tsup": "^8.0.0"
     }
 }

@@ -16,7 +16,6 @@ describe('XP Logic Engine', () => {
         payload: {
           userId,
           url: 'https://github.com/expnet/core',
-          description: 'Initial commit',
           complexityScore: 5,
         },
       },
@@ -28,7 +27,6 @@ describe('XP Logic Engine', () => {
         payload: {
           userId,
           url: 'https://github.com/expnet/core',
-          description: 'Fix bug',
           complexityScore: 0,
         },
       },
@@ -38,8 +36,7 @@ describe('XP Logic Engine', () => {
 
     // Event 1: 10 base + 5 bonus = 15
     // Event 2: 10 base + 0 bonus = 10
-    // Total: 25
-    expect(state[toUserId(userId)].total).toBe(25);
-    expect(state[toUserId(userId)].details['general_contribution']).toBe(25);
+    // Total pending: 25
+    expect(state[toUserId(userId)].pendingXP).toBe(25);
   });
 });

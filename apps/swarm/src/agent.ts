@@ -1,16 +1,18 @@
 import { faker } from '@faker-js/faker';
 import { ContributionSubmitted, VerificationSubmitted } from '@fated/events';
-import { UserId, toUserId } from '@fated/types';
+import { UserId, toUserId, Specialty } from '@fated/types';
 
 export class Agent {
     public readonly id: UserId;
     public readonly name: string;
     public readonly role: 'BUILDER' | 'REVIEWER';
+    public readonly specialty: Specialty;
 
-    constructor() {
+    constructor(specialty?: Specialty) {
         this.id = toUserId(faker.string.uuid());
         this.name = faker.internet.userName();
         this.role = Math.random() > 0.5 ? 'BUILDER' : 'REVIEWER';
+        this.specialty = specialty || (['BACKEND', 'FRONTEND', 'DEVOPS', 'SECURITY', 'RESEARCH'][Math.floor(Math.random() * 5)] as Specialty);
     }
 
     public act(now: Date): ContributionSubmitted | null {
@@ -26,6 +28,7 @@ export class Agent {
                 userId: this.id,
                 url: `https://github.com/expnet/${faker.hacker.noun()}`,
                 complexityScore: Math.floor(Math.random() * 10) + 1,
+                specialty: this.specialty,
             },
         };
     }
@@ -44,6 +47,7 @@ export class Agent {
                 targetContributionId: targetId,
                 verdict: 'APPROVE',
                 qualityScore: 5,
+                specialty: this.specialty,
             },
         };
     }

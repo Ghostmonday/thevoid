@@ -1,0 +1,58 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Event {
+  id               String   @id @default(uuid())
+  actorId          String   // Denormalized for efficient queries
+  streamId         String
+  timestamp        DateTime
+  type             String
+  payload          String   // JSON string
+  metadata         String?  // JSON string (optional)
+  createdAt        DateTime @default(now())
+
+  @@index([actorId, timestamp(sort: Desc)])
+}
+
+model ActorState {
+  actorId          String   @id
+  currentXp        Int      @default(0)
+  pendingXp        Int      @default(0)
+  contributions    Int      @default(0)
+  decayRate        Float    @default(0.0)
+  lastActivity     DateTime?
+  lastUpdated      DateTime @default(now())
+  roleHistory      String   @default("[]") // JSON string
+  successRate      String   @default("{}")  // JSON: { BACKEND: 0.85, FRONTEND: 0.72 }
+}
+
+model Project {
+  id          String   @id @default(uuid())
+  name        String
+  domain      String   // BACKEND, FRONTEND, etc.
+  status      String   @default("OPEN") // OPEN, ACTIVE, COMPLETED
+  squadIds    String   // JSON array of UserIds
+  createdAt   DateTime @default(now())
+  completedAt DateTime?
+  evaluations Evaluation[] @relation("ProjectEvaluations") @onDelete(Cascade)
+
+  @@index([status])
+}
+
+model Evaluation {
+  id          String   @id @default(uuid())
+  projectId   String
+  userId      String   // Who is being evaluated
+  score       Float    // 0.0 to 1.0 success rate
+  feedback    String?
+  createdAt   DateTime @default(now())
+  project     Project  @relation("ProjectEvaluations", fields: [projectId], references: [id])
+
+  @@unique([projectId, userId]) // Prevent duplicate evaluations per project per user
+}

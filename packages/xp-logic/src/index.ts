@@ -1,12 +1,19 @@
 import { AppEvent } from '@fated/events';
-import { UserId } from '@fated/types';
+import { Specialty, UserId } from '@fated/types';
 
 export type XpVector = {
-  total: number;
-  pending: number;
-  contributions: number;
+  totalXP: number;
+  pendingXP: number;
+  execution: number;      // From BUILDER actions
+  collaboration: number;  // From ARCHITECT actions
+  judgment: number;       // From GUARDIAN actions
+  roleHistory: Record<string, Record<string, number>>; // { BUILDER: { BACKEND: 15 } }
+  successRate: Record<string, number>; // { BACKEND: 0.85, FRONTEND: 0.72 }
   lastActivity: Date | null;
 };
+
+// Internal tracking for running average calculation
+type RunningAverage = { total: number; count: number };
 
 export type SystemState = Record<UserId, XpVector>;
 
@@ -23,10 +30,25 @@ export const calculateState = (events: AppEvent[], now: Date = new Date()): Syst
   const state: SystemState = {};
 
   const contributions: Record<string, { userId: UserId; xpValue: number; approved: boolean }> = {};
+  const projectDomains: Record<string, string> = {}; // projectId -> domain
+  const successTracking: Record<string, Record<string, RunningAverage>> = {}; // userId -> domain -> { total, count }
 
   const initUser = (uid: string) => {
     const id = uid as UserId;
-    if (!state[id]) state[id] = { total: 0, pending: 0, contributions: 0, lastActivity: null };
+    if (!state[id]) state[id] = {
+      totalXP: 0,
+      pendingXP: 0,
+      execution: 0,
+      collaboration: 0,
+      judgment: 0,
+      roleHistory: {},
+      successRate: {},
+      lastActivity: null
+    };
+    // Initialize success tracking for this user
+    if (!successTracking[id]) {
+      successTracking[id] = {};
+    }
     return id;
   };
 
@@ -34,10 +56,17 @@ export const calculateState = (events: AppEvent[], now: Date = new Date()): Syst
     if (isContribution(event)) {
       const uid = initUser(event.payload.userId);
       const xpValue = 10 + (event.payload.complexityScore ?? 0);
+      const role = 'BUILDER';
+      const specialty = (event.payload as { specialty?: Specialty }).specialty || 'RESEARCH';
 
       contributions[event.id] = { userId: uid, xpValue, approved: false };
-      state[uid].pending += xpValue;
-      state[uid].contributions += 1;
+      state[uid].pendingXP += xpValue;
+      state[uid].execution += xpValue;
+
+      // Track roleHistory: { BUILDER: { BACKEND: 15 } }
+      if (!state[uid].roleHistory[role]) state[uid].roleHistory[role] = {};
+      if (!state[uid].roleHistory[role][specialty]) state[uid].roleHistory[role][specialty] = 0;
+      state[uid].roleHistory[role][specialty] += 1;
 
       if (!state[uid].lastActivity || event.timestamp > state[uid].lastActivity!) {
         state[uid].lastActivity = event.timestamp;
@@ -48,13 +77,48 @@ export const calculateState = (events: AppEvent[], now: Date = new Date()): Syst
       const work = contributions[event.payload.targetContributionId];
       if (work && !work.approved && event.payload.verdict === 'APPROVE') {
         work.approved = true;
-        state[work.userId].pending -= work.xpValue;
-        state[work.userId].total += work.xpValue;
+        state[work.userId].pendingXP -= work.xpValue;
+        state[work.userId].totalXP += work.xpValue;
 
         const verifierId = initUser(event.payload.verifierId);
-        state[verifierId].total += 2;
+        state[verifierId].totalXP += 2;
+        state[verifierId].judgment += 2;
         if (!state[verifierId].lastActivity || event.timestamp > state[verifierId].lastActivity!) {
           state[verifierId].lastActivity = event.timestamp;
+        }
+      }
+    }
+
+    // Track project domains from PROJECT_CREATED events
+    if (event.type === 'PROJECT_CREATED') {
+      const payload = event.payload as { projectId: string; domain: string };
+      projectDomains[payload.projectId] = payload.domain;
+    }
+
+    // Update success rates from PROJECT_COMPLETED events
+    if (event.type === 'PROJECT_COMPLETED') {
+      const payload = event.payload as {
+        projectId: string;
+        evaluations: Array<{ userId: string; score: number }>
+      };
+      const domain = projectDomains[payload.projectId];
+
+      for (const evaluation of payload.evaluations) {
+        const userId = evaluation.userId;
+        initUser(userId);
+
+        // Initialize domain tracking if needed
+        if (domain && !successTracking[userId][domain]) {
+          successTracking[userId][domain] = { total: 0, count: 0 };
+        }
+
+        // Update running average for this domain
+        if (domain) {
+          const tracking = successTracking[userId][domain];
+          tracking.total += evaluation.score;
+          tracking.count += 1;
+          const uid = userId as UserId;
+          state[uid].successRate[domain] = tracking.total / tracking.count;
         }
       }
     }
@@ -72,7 +136,7 @@ export const calculateState = (events: AppEvent[], now: Date = new Date()): Syst
       const monthsInactive = Math.floor((daysInactive - 30) / 30);
       if (monthsInactive > 0) {
         const decayFactor = Math.pow(0.95, monthsInactive);
-        user.total = Math.floor(user.total * decayFactor);
+        user.totalXP = Math.floor(user.totalXP * decayFactor);
       }
     }
   }
