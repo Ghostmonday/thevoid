@@ -47,27 +47,32 @@ async function main() {
 
         // Upsert actor states
         const actorEntries = Object.entries(state) as [string, XpVector][];
-        for (const [actorId, xpVector] of actorEntries) {
-            await prisma.actorState.upsert({
-                where: { actorId },
-                update: {
-                    currentXp: xpVector.total,
-                    pendingXp: xpVector.pending,
-                    contributions: xpVector.contributions,
-                    lastActivity: xpVector.lastActivity,
-                    lastUpdated: new Date()
-                },
-                create: {
-                    actorId,
-                    currentXp: xpVector.total,
-                    pendingXp: xpVector.pending,
-                    contributions: xpVector.contributions,
-                    lastActivity: xpVector.lastActivity,
-                    lastUpdated: new Date(),
-                    decayRate: 0.0,
-                    roleHistory: '[]'
-                }
-            });
+        const BATCH_SIZE = 50;
+
+        for (let i = 0; i < actorEntries.length; i += BATCH_SIZE) {
+            const batch = actorEntries.slice(i, i + BATCH_SIZE);
+            await Promise.all(batch.map(([actorId, xpVector]) =>
+                prisma.actorState.upsert({
+                    where: { actorId },
+                    update: {
+                        currentXp: xpVector.totalXP,
+                        pendingXp: xpVector.pendingXP,
+                        contributions: 0,
+                        lastActivity: xpVector.lastActivity,
+                        lastUpdated: new Date()
+                    },
+                    create: {
+                        actorId,
+                        currentXp: xpVector.totalXP,
+                        pendingXp: xpVector.pendingXP,
+                        contributions: 0,
+                        lastActivity: xpVector.lastActivity,
+                        lastUpdated: new Date(),
+                        decayRate: 0.0,
+                        roleHistory: '[]'
+                    }
+                })
+            ));
         }
         console.log(`Upserted ${actorEntries.length} actors`);
 
