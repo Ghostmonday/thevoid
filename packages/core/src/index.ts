@@ -119,7 +119,7 @@ export const TicketClaimedSchema = BaseEventSchema.extend({
     ticketId: z.string(),
     stakeId: z.string(),
     title: z.string(),
-    deadline: z.date(),
+    deadline: z.coerce.date(),
   }),
 });
 
