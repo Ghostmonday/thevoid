@@ -75,7 +75,7 @@ Modern collaboration fails at scale:
 | Trust decay | Continued signal required; no status hoarding |
 | Progressive participation | Passive until ready; no forced credential submission |
 
-### The Adventuring Party Model
+### The Execution Squad Model
 
 Teams need composition, not just skills. A project needs:
 

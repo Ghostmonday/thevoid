@@ -226,7 +226,7 @@ The philosophy depends on several things that are rarely stated:
 
 ### Tension 4: "Inevitable Excellence" vs. Humility
 
-**Adventuring Party doc:** "The teams that form are not merely 'good matches.' They are *inevitable*."
+**Execution Squad doc:** "The teams that form are not merely 'good matches.' They are *inevitable*."
 
 **Reality:** No system produces inevitable excellence. That language is hubris. Teams fail for reasons no telemetry captures—chemistry, timing, external stress. Overpromising sets up disappointment.
 
@@ -277,7 +277,7 @@ User can attach narrative, context, or explanation to their profile. Telemetry a
 
 ---
 
-### Alternative to Adventuring Party Model
+### Alternative to Execution Squad Model
 
 **Option A: *Affinity* over *role***  
 Instead of fixed roles (Architect, Builder, Guardian), match on *affinities*: "likes to go deep," "prefers coordination," "enjoys mentoring." Softer, less prescriptive.
