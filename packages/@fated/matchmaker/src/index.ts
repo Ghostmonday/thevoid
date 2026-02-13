@@ -7,17 +7,42 @@
  */
 
 import { z } from 'zod';
-import {
-  UserREPProfileSchema,
-  TrustScoreSchema,
-  SquadSchema,
-  ExecutionRoleSchema,
-  type UserREPProfile,
-  type TrustScore,
-  type Squad,
-  type ExecutionRole,
-  type UserId,
-} from '@fated/types';
+
+// ============================================
+// TYPES (Inlined to avoid cross-package deps)
+// ============================================
+
+type UserId = string;
+
+type ExecutionRole = 'LEAD' | 'ENGINEER' | 'AUDITOR' | 'COORDINATOR' | 'MENTOR' | 'SPONSOR';
+
+interface REPRecord {
+  axis: string;
+  amount: number;
+  earnedAt?: Date;
+  decayRate?: number;
+}
+
+interface UserREPProfile {
+  userId: UserId;
+  records: REPRecord[];
+  totalREP: number;
+  lastUpdated: Date;
+}
+
+interface SquadMember {
+  userId: UserId;
+  role: ExecutionRole;
+  joinedAt: Date;
+}
+
+interface Squad {
+  id: UserId;
+  name: string;
+  members: SquadMember[];
+  mission?: string;
+  createdAt: Date;
+}
 
 // ============================================
 // MATCHING CRITERIA
@@ -27,7 +52,7 @@ export const MatchingCriteriaSchema = z.object({
   requiredAxes: z.array(z.string()),
   preferredAxes: z.array(z.string()),
   minTrustScore: z.number().min(0).max(100).default(0),
-  rolesNeeded: z.array(ExecutionRoleSchema),
+  rolesNeeded: z.array(z.enum(['LEAD', 'ENGINEER', 'AUDITOR', 'COORDINATOR', 'MENTOR', 'SPONSOR'])),
   maxTeamSize: z.number().int().min(2).max(10).default(5),
 });
 export type MatchingCriteria = z.infer<typeof MatchingCriteriaSchema>;
@@ -49,7 +74,7 @@ function calculateSkillMatch(
   // Required axes must be present
   for (const axis of criteria.requiredAxes) {
     maxScore += 30;
-    const userAxis = userProfile.records.find(r => r.axis === axis);
+    const userAxis = userProfile.records.find((r) => r.axis === axis);
     if (userAxis && userAxis.amount > 0) {
       score += 30;
     }
@@ -58,7 +83,7 @@ function calculateSkillMatch(
   // Preferred axes are bonus
   for (const axis of criteria.preferredAxes) {
     maxScore += 15;
-    const userAxis = userProfile.records.find(r => r.axis === axis);
+    const userAxis = userProfile.records.find((r) => r.axis === axis);
     if (userAxis && userAxis.amount > 0) {
       score += 15;
     }
@@ -116,13 +141,13 @@ export function findMatches(
   trustMatch: number;
 }> {
   const matches = candidates
-    .map(candidate => ({
+    .map((candidate) => ({
       userId: candidate.userId,
       score: calculateMatchScore(candidate.profile, candidate.trustScore, criteria),
       skillMatch: calculateSkillMatch(candidate.profile, criteria),
       trustMatch: calculateTrustMatch(candidate.trustScore, criteria),
     }))
-    .filter(match => match.score > 0)
+    .filter((match) => match.score > 0)
     .sort((a, b) => b.score - a.score);
 
   return matches;
@@ -145,7 +170,7 @@ export function formSquad(
   const selectedMembers = matches.slice(0, criteria.maxTeamSize);
   
   // Assign roles based on best skills
-  const roleAssignment = assignRoles(selectedMembers, criteria.rolesNeeded);
+  const roleAssignment = assignRoles(selectedMembers, [...criteria.rolesNeeded]);
   
   const squad: Squad = {
     id: crypto.randomUUID() as UserId,
@@ -210,7 +235,7 @@ export function calculateSquadTrust(
   const avgTrust = memberTrustScores.reduce((a, b) => a + b, 0) / memberTrustScores.length;
   
   // Apply gradient bonus for high-trust squads
-  const highTrustMembers = memberTrustScores.filter(t => t >= 75).length;
+  const highTrustMembers = memberTrustScores.filter((t) => t >= 75).length;
   const gradientBonus = (highTrustMembers / memberTrustScores.length) * 10;
   
   return Math.min(100, Math.round(avgTrust + gradientBonus));
