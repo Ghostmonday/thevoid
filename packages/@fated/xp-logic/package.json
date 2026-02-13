@@ -1,0 +1,20 @@
+{
+  "name": "@fated/xp-logic",
+  "version": "1.0.0",
+  "description": "Kernel - Decay algorithms, Trust Gradients, REP calculations",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "jest"
+  },
+  "dependencies": {
+    "@fated/types": "1.0.0",
+    "@fated/event-store": "1.0.0",
+    "zod": "^3.22.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.0",
+    "@types/node": "^20.0.0"
+  }
+}
