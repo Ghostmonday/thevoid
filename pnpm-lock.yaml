@@ -7,6 +7,10 @@ settings:
 importers:
 
   .:
+    dependencies:
+      '@prisma/client':
+        specifier: ^5.22.0
+        version: 5.22.0(prisma@5.22.0)
     devDependencies:
       '@types/node':
         specifier: ^20.0.0
@@ -250,6 +254,9 @@ importers:
       '@fated/core':
         specifier: workspace:*
         version: link:../../core
+      '@fated/domain-xp':
+        specifier: workspace:*
+        version: link:../../domain/xp
       zod:
         specifier: ^3.22.0
         version: 3.25.76

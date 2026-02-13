@@ -278,27 +278,118 @@ fastify.post('/mint-rep', async (request: FastifyRequest<{ Body: { actorId: stri
 });
 
 // ============================================
-// ADMIN & REAPER
+// ADMIN & REAPER (Forfeiture Processing)
 // ============================================
 
-const REAPER_INTERVAL_MS = 60 * 1000;
+// Configuration with environment variables and sensible defaults
+const REAPER_CONFIG = {
+  // Default: 5 minutes (300s) - much more reasonable than 60s
+  intervalMs: parseInt(process.env.REAPER_INTERVAL_MS || '300000'),
+  // Default: 50% slash on forfeited stakes
+  slashPercent: parseFloat(process.env.REAPER_SLASH_PERCENT || '0.5'),
+  // Enable/disable via env (default: enabled in production-like envs)
+  enabled: process.env.REAPER_ENABLED !== 'false',
+  // Jitter percentage to avoid thundering herd (±10%)
+  jitterPercent: 0.1,
+};
 
-console.log(`[Reaper] ⏰ Starting automatic forfeiture checks (every ${REAPER_INTERVAL_MS/1000}s)`);
+let reaperInterval: NodeJS.Timeout | null = null;
 
-setInterval(async () => {
+/**
+ * Calculate next run time with jitter to avoid thundering herd
+ */
+function getNextRunTime(baseIntervalMs: number, jitterPercent: number): number {
+  const jitter = baseIntervalMs * jitterPercent;
+  const randomJitter = (Math.random() * 2 - 1) * jitter; // ±jitter
+  return Math.max(1000, baseIntervalMs + randomJitter); // Minimum 1s
+}
+
+/**
+ * Execute the reaper - process overdue tickets and slash staked REP
+ */
+async function runReaper(): Promise<{ processed: number; results: Array<{ ticketId: string; slashed: number; returned: number }> }> {
   try {
-    const results = await processForfeitures(0.5);
+    const results = await processForfeitures(REAPER_CONFIG.slashPercent);
     if (results.length > 0) {
       console.log(`[Reaper] 💀 Executed ${results.length} forfeitures`);
+      for (const r of results) {
+        console.log(`[Reaper]   - Ticket ${r.ticketId.slice(0, 8)}: slashed ${r.slashed.toFixed(2)} REP, returned ${r.returned.toFixed(2)} REP`);
+      }
     }
+    return { processed: results.length, results };
   } catch (err) {
     console.error('[Reaper] ❌ Error:', err);
+    return { processed: 0, results: [] };
   }
-}, REAPER_INTERVAL_MS);
+}
 
+/**
+ * Start the reaper with configurable interval and jitter
+ */
+function startReaper(): void {
+  if (!REAPER_CONFIG.enabled) {
+    console.log('[Reaper] ⚠️  Reaper is disabled (REAPER_ENABLED=false)');
+    return;
+  }
+
+  console.log(`[Reaper] ⏰ Starting automatic forfeiture checks (every ${REAPER_CONFIG.intervalMs / 1000}s, slash ${REAPER_CONFIG.slashPercent * 100}%)`);
+
+  // Initial run after a short delay
+  setTimeout(async () => {
+    await runReaper();
+  }, 5000);
+
+  // Schedule with jitter
+  const scheduleNext = () => {
+    const nextRun = getNextRunTime(REAPER_CONFIG.intervalMs, REAPER_CONFIG.jitterPercent);
+    reaperInterval = setTimeout(async () => {
+      await runReaper();
+      scheduleNext(); // Reschedule with new jitter
+    }, nextRun);
+  };
+
+  scheduleNext();
+}
+
+/**
+ * Stop the reaper gracefully
+ */
+function stopReaper(): void {
+  if (reaperInterval) {
+    clearTimeout(reaperInterval);
+    reaperInterval = null;
+    console.log('[Reaper] 🛑 Reaper stopped');
+  }
+}
+
+// Start reaper on module load
+startReaper();
+
+// Graceful shutdown handlers
+process.on('SIGTERM', () => {
+  console.log('[Reaper] 📥 Received SIGTERM, shutting down...');
+  stopReaper();
+});
+
+process.on('SIGINT', () => {
+  console.log('[Reaper] 📥 Received SIGINT, shutting down...');
+  stopReaper();
+});
+
+// Manual trigger endpoint for testing/admin
 fastify.post('/admin/reaper', async () => {
-  const results = await processForfeitures(0.5);
-  return { success: true, processed: results.length, results };
+  const result = await runReaper();
+  return { success: true, ...result };
+});
+
+// Health check for reaper status
+fastify.get('/admin/reaper/status', async () => {
+  return {
+    enabled: REAPER_CONFIG.enabled,
+    intervalMs: REAPER_CONFIG.intervalMs,
+    slashPercent: REAPER_CONFIG.slashPercent,
+    running: reaperInterval !== null,
+  };
 });
 
 // ============================================

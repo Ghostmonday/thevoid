@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@fated/core": "workspace:*",
+    "@fated/domain-xp": "workspace:*",
     "zod": "^3.22.0"
   },
   "devDependencies": {
