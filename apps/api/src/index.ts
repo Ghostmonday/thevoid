@@ -1,10 +1,51 @@
 import Fastify, { FastifyRequest, FastifyInstance } from 'fastify';
-import { randomUUID } from 'crypto';
+import { randomUUID, timingSafeEqual } from 'crypto';
 import { formParty } from '@fated/matchmaker';
 import { AppEvent } from '@fated/events';
 import { InMemoryEventStore } from '@fated/event-store';
 
 const fastify = Fastify({ logger: true });
+
+// Authentication Hook
+const API_SECRET = process.env.API_SECRET;
+
+// Enforce security in production
+if (process.env.NODE_ENV === 'production' && !API_SECRET) {
+    console.error('FATAL: API_SECRET environment variable is required in production.');
+    process.exit(1);
+}
+
+const EFFECTIVE_API_SECRET = API_SECRET || 'dev-api-secret';
+
+fastify.addHook('preHandler', async (request, reply) => {
+    // Exclude GitHub webhooks from this auth mechanism
+    if (request.url.startsWith('/webhooks/github')) {
+        return;
+    }
+
+    // Exclude simple health check if it existed (not currently defined but safe to exclude)
+    if (request.url === '/health') {
+        return;
+    }
+
+    const apiKey = request.headers['x-api-key'];
+
+    if (!apiKey || typeof apiKey !== 'string') {
+        return reply.status(401).send({ error: 'Unauthorized' });
+    }
+
+    // Constant-time comparison to prevent timing attacks
+    const secretBuffer = Buffer.from(EFFECTIVE_API_SECRET);
+    const keyBuffer = Buffer.from(apiKey);
+
+    if (secretBuffer.length !== keyBuffer.length) {
+        return reply.status(401).send({ error: 'Unauthorized' });
+    }
+
+    if (!timingSafeEqual(secretBuffer, keyBuffer)) {
+        return reply.status(401).send({ error: 'Unauthorized' });
+    }
+});
 
 // Global error handler for production resilience
 fastify.setErrorHandler((error: any, request: FastifyRequest, reply: any) => {
