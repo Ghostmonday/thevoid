@@ -91,16 +91,13 @@ export const calculateState = (events: AppEvent[], now: Date = new Date()): Syst
 
     // Track project domains from PROJECT_CREATED events
     if (event.type === 'PROJECT_CREATED') {
-      const payload = event.payload as { projectId: string; domain: string };
+      const payload = event.payload;
       projectDomains[payload.projectId] = payload.domain;
     }
 
     // Update success rates from PROJECT_COMPLETED events
     if (event.type === 'PROJECT_COMPLETED') {
-      const payload = event.payload as {
-        projectId: string;
-        evaluations: Array<{ userId: string; score: number }>
-      };
+      const payload = event.payload;
       const domain = projectDomains[payload.projectId];
 
       for (const evaluation of payload.evaluations) {
