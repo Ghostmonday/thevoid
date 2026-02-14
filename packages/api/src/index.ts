@@ -584,6 +584,343 @@ fastify.delete('/admin/sim/reset', async () => {
 });
 
 // ============================================
+// ADVANCED SIMULATION ENDPOINTS
+// ============================================
+
+// Scenario 1: Competition Simulation (multiple actors vying for tickets)
+fastify.post('/admin/sim/competition', async (request: FastifyRequest<{ Body: { 
+  actors?: number; 
+  tickets?: number;
+  iterations?: number;
+} }>) => {
+  const { actors = 10, tickets = 5, iterations = 1 } = request.body || {};
+  const results: any[] = [];
+  
+  for (let iter = 0; iter < iterations; iter++) {
+    // Create actors
+    const actorIds: string[] = [];
+    for (let i = 0; i < actors; i++) {
+      const actorId = randomUUID();
+      actorIds.push(actorId);
+      await prisma.actorState.upsert({
+        where: { actorId },
+        update: {},
+        create: { actorId, currentRep: 1000, stakedRep: 0 },
+      });
+    }
+    
+    // Create tickets
+    const ticketIds: string[] = [];
+    for (let i = 0; i < tickets; i++) {
+      const deadline = new Date(Date.now() + (i + 1) * 86400000); // Staggered deadlines
+      const ticket = await createTicket({
+        workPackageId: `sim-compet-${iter}-${i}`,
+        title: `Competition Quest ${i}`,
+        bondRequired: 30 + Math.floor(Math.random() * 40),
+        deadline,
+      });
+      ticketIds.push(ticket.id);
+    }
+    
+    // Simulate competition: each actor tries to claim each ticket
+    let claims = 0;
+    let conflicts = 0;
+    for (const actorId of actorIds) {
+      for (const ticketId of ticketIds) {
+        try {
+          await claimTicket({ actorId, ticketId });
+          claims++;
+        } catch (e) {
+          conflicts++; // Ticket already claimed
+        }
+      }
+    }
+    
+    results.push({ iter, actors, tickets, claims, conflicts });
+  }
+  
+  return { scenario: 'competition', actors, tickets, iterations, results };
+});
+
+// Scenario 2: Forfeiture Simulation (past deadlines)
+fastify.post('/admin/sim/forfeiture', async (request: FastifyRequest<{ Body: { 
+  claimedTickets?: number;
+  hoursPastDeadline?: number;
+} }>) => {
+  const { claimedTickets = 10, hoursPastDeadline = 1 } = request.body || {};
+  
+  // Create actor with enough REP to stake
+  const actorId = randomUUID();
+  await prisma.actorState.upsert({
+    where: { actorId },
+    update: {},
+    create: { actorId: actorId, currentRep: 10000, stakedRep: 0 },
+  });
+  
+  // First stake some REP (so they have stakedRep to use for bonds)
+  await stakeRep({ actorId, amount: 5000 });
+  
+  // Create and claim tickets with PAST deadlines
+  const ticketIds: string[] = [];
+  for (let i = 0; i < claimedTickets; i++) {
+    // Set deadline in the past
+    const deadline = new Date(Date.now() - (hoursPastDeadline * 3600000) - (i * 60000));
+    const ticket = await createTicket({
+      workPackageId: `forfeit-${i}`,
+      title: `Forfeit Quest ${i}`,
+      bondRequired: 50,
+      deadline,
+    });
+    
+    // Claim it - this should stake the bond
+    try {
+      await claimTicket({ actorId, ticketId: ticket.id });
+      ticketIds.push(ticket.id);
+    } catch (e) {
+      return { error: (e as Error).message, actorId, ticketCreated: i };
+    }
+  }
+  
+  // Run reaper
+  const reaperResult = await processForfeitures();
+  
+  return { 
+    scenario: 'forfeiture',
+    actorId,
+    ticketsCreated: claimedTickets,
+    hoursPastDeadline,
+    reaperResults: reaperResult,
+  };
+});
+
+// Scenario 3: XP Decay Simulation (inactivity over time)
+fastify.post('/admin/sim/xp-decay', async (request: FastifyRequest<{ Body: { 
+  actors?: number;
+  daysInactive?: number;
+  initialXp?: number;
+} }>) => {
+  const { actors = 10, daysInactive = 30, initialXp = 1000 } = request.body || {};
+  
+  const results: any[] = [];
+  
+  for (let i = 0; i < actors; i++) {
+    const actorId = randomUUID();
+    const lastActivity = new Date(Date.now() - (daysInactive * 86400000));
+    
+    await prisma.actorState.upsert({
+      where: { actorId },
+      update: {},
+      create: { 
+        actorId, 
+        currentRep: 1000, 
+        stakedRep: 0,
+        currentXp: initialXp,
+        lastActivity: lastActivity,
+        decayRate: 0.01, // 1% decay per day
+      },
+    });
+    
+    // Calculate expected decay
+    const daysSinceActivity = Math.floor((Date.now() - lastActivity.getTime()) / 86400000);
+    const expectedDecay = Math.min(0.5, daysSinceActivity * 0.01); // Max 50% decay
+    const expectedXp = Math.floor(initialXp * (1 - expectedDecay));
+    
+    results.push({ actorId, daysInactive: daysSinceActivity, initialXp, expectedXp, decayRate: 0.01 });
+  }
+  
+  return { scenario: 'xp-decay', actors, daysInactive, initialXp, results };
+});
+
+// Scenario 4: High Stake Simulation (bonding mechanics)
+fastify.post('/admin/sim/high-stakes', async (request: FastifyRequest<{ Body: { 
+  actors?: number;
+  ticketValue?: number;
+  winRate?: number;
+} }>) => {
+  const { actors = 20, ticketValue = 100, winRate = 0.7 } = request.body || {};
+  
+  const actorStats: any[] = [];
+  
+  for (let i = 0; i < actors; i++) {
+    const actorId = randomUUID();
+    const startingRep = 1000 + Math.floor(Math.random() * 4000);
+    
+    // Create actor with high REP
+    await prisma.actorState.upsert({
+      where: { actorId },
+      update: {},
+      create: { actorId, currentRep: startingRep, stakedRep: 0 },
+    });
+    
+    // Simulate 10 tickets each
+    let wins = 0;
+    let losses = 0;
+    let totalStaked = 0;
+    
+    for (let j = 0; j < 10; j++) {
+      const deadline = new Date(Date.now() + 86400000);
+      const ticket = await createTicket({
+        workPackageId: `hs-${i}-${j}`,
+        title: `High Stake Quest ${j}`,
+        bondRequired: ticketValue,
+        deadline,
+      });
+      
+      try {
+        await claimTicket({ actorId, ticketId: ticket.id });
+        totalStaked += ticketValue;
+        
+        // Simulate completion vs forfeiture
+        if (Math.random() < winRate) {
+          await completeTicket({ ticketId: ticket.id, verifierId: actorId });
+          wins++;
+        } else {
+          losses++;
+        }
+      } catch (e) {
+        // Already claimed
+      }
+    }
+    
+    actorStats.push({ 
+      actorId: actorId.slice(0, 8), 
+      startingRep, 
+      wins, 
+      losses, 
+      totalStaked,
+      winRate: (wins / (wins + losses) * 100).toFixed(1) + '%'
+    });
+  }
+  
+  return { scenario: 'high-stakes', actors, ticketValue, winRate, actorStats };
+});
+
+// Scenario 5: Activity Heatmap (engagement over time)
+fastify.post('/admin/sim/activity', async (request: FastifyRequest<{ Body: { 
+  days?: number;
+  actorsPerDay?: number;
+} }>) => {
+  const { days = 30, actorsPerDay = 5 } = request.body || {};
+  
+  const activityByDay: Record<string, number> = {};
+  
+  for (let d = 0; d < days; d++) {
+    const date = new Date(Date.now() - (d * 86400000)).toISOString().split('T')[0];
+    let actions = 0;
+    
+    for (let a = 0; a < actorsPerDay; a++) {
+      const actorId = randomUUID();
+      
+      // Random action type
+      const actionType = Math.floor(Math.random() * 4);
+      if (actionType === 0) {
+        // Mint REP
+        await prisma.actorState.upsert({
+          where: { actorId },
+          update: {},
+          create: { actorId, currentRep: 100, stakedRep: 0 },
+        });
+        actions++;
+      } else if (actionType === 1) {
+        // Create ticket
+        try {
+          const deadline = new Date(Date.now() + 86400000);
+          await createTicket({
+            workPackageId: `act-${date}-${a}`,
+            title: `Activity Quest ${date}`,
+            bondRequired: 30,
+            deadline,
+          });
+          actions++;
+        } catch (e) { /* ignore */ }
+      }
+    }
+    
+    activityByDay[date] = actions;
+  }
+  
+  return { scenario: 'activity', days, actorsPerDay, totalActions: Object.values(activityByDay).reduce((a, b) => a + b, 0), activityByDay };
+});
+
+// Scenario 6: Market Dynamics (supply/demand of tickets)
+fastify.post('/admin/sim/market', async (request: FastifyRequest<{ Body: { 
+  creators?: number;
+  workers?: number;
+  ticketsPerCreator?: number;
+} }>) => {
+  const { creators = 5, workers = 20, ticketsPerCreator = 10 } = request.body || {};
+  
+  // Creators make tickets
+  const creatorIds: string[] = [];
+  for (let i = 0; i < creators; i++) {
+    const creatorId = randomUUID();
+    creatorIds.push(creatorId);
+    await prisma.actorState.upsert({
+      where: { actorId: creatorId },
+      update: {},
+      create: { actorId: creatorId, currentRep: 10000, stakedRep: 0 },
+    });
+  }
+  
+  // Create tickets
+  let totalTicketValue = 0;
+  for (const creatorId of creatorIds) {
+    for (let i = 0; i < ticketsPerCreator; i++) {
+      const bond = 20 + Math.floor(Math.random() * 80);
+      const deadline = new Date(Date.now() + (7 + Math.floor(Math.random() * 14)) * 86400000);
+      
+      await createTicket({
+        workPackageId: `market-${creatorId.slice(0, 4)}-${i}`,
+        title: `Market Quest ${i}`,
+        bondRequired: bond,
+        deadline,
+      });
+      totalTicketValue += bond;
+    }
+  }
+  
+  // Workers compete for tickets
+  let claimed = 0;
+  let failedToClaim = 0;
+  
+  for (let w = 0; w < workers; w++) {
+    const workerId = randomUUID();
+    await prisma.actorState.upsert({
+      where: { actorId: workerId },
+      update: {},
+      create: { actorId: workerId, currentRep: 500, stakedRep: 0 },
+    });
+    
+    // Try to claim as many as possible
+    const tickets = await prisma.ticket.findMany({ where: { status: 'OPEN' } });
+    for (const ticket of tickets) {
+      try {
+        await claimTicket({ actorId: workerId, ticketId: ticket.id });
+        claimed++;
+      } catch (e) {
+        failedToClaim++;
+      }
+    }
+  }
+  
+  const openTickets = await prisma.ticket.count({ where: { status: 'OPEN' } });
+  const claimedTickets = await prisma.ticket.count({ where: { status: 'CLAIMED' } });
+  
+  return { 
+    scenario: 'market',
+    creators,
+    workers,
+    ticketsPerCreator,
+    totalTickets: creators * ticketsPerCreator,
+    totalTicketValue,
+    claimed,
+    failedToClaim,
+    remaining: { open: openTickets, claimed: claimedTickets },
+    supplyDemand: ((claimed / (creators * ticketsPerCreator)) * 100).toFixed(1) + '% filled'
+  };
+});
+
+// ============================================
 // START SERVER
 // ============================================
 
