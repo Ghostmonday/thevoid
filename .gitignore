@@ -8,6 +8,7 @@ node_modules/
 out/
 dist/
 build/
+.turbo
 
 # Testing
 coverage/
@@ -30,3 +31,7 @@ yarn-error.log*
 
 # System
 Thumbs.db
+
+# Environment
+.env
+*.log

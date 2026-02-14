@@ -3,23 +3,36 @@
   "version": "1.0.0",
   "private": true,
   "description": "FatedFortress - Sovereign Talent Marketplace",
+  "packageManager": "pnpm@9.15.4",
   "workspaces": [
     "apps/*",
     "packages/*"
   ],
+  "engines": {
+    "node": ">=20.0.0"
+  },
   "scripts": {
-    "dev": "npm run dev --workspace=apps/web",
+    "dev": "turbo dev",
+    "dev:web": "npm run dev --workspace=apps/web",
     "dev:api": "npm run dev --workspace=apps/api",
-    "build": "npm run build --workspace=apps/web && npm run build --workspace=apps/api",
+    "build": "turbo build",
     "build:web": "npm run build --workspace=apps/web",
     "build:api": "npm run build --workspace=apps/api",
     "start": "npm run start --workspace=apps/web",
     "start:api": "npm run start --workspace=apps/api",
-    "test": "echo 'Tests not configured yet'",
-    "lint": "npm run lint --workspace=apps/web"
+    "test": "turbo test",
+    "lint": "npm run lint --workspace=apps/web",
+    "clean": "rm -rf node_modules **/*/node_modules"
   },
   "devDependencies": {
-    "typescript": "^5.3.0",
-    "@types/node": "^20.0.0"
+    "@types/node": "^20.0.0",
+    "dotenv-cli": "^7.0.0",
+    "tsup": "^8.0.0",
+    "turbo": "^2.0.0",
+    "typescript": "^5.0.0",
+    "vitest": "^1.0.0"
+  },
+  "dependencies": {
+    "@prisma/client": "^5.22.0"
   }
 }
