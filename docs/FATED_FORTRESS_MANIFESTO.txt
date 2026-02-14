@@ -1,0 +1,56 @@
+FATED FORTRESS — MANIFESTO
+
+> **Note:** This document uses two parallel vocabularies:
+> - **Community/Matching** (RPG): Adventuring Party, XP, Guardian
+> - **Accountability** (Industrial): Bonds, Slashing, Verification
+>
+> The separation ensures the metaphor serves its purpose without genre confusion.
+> See `docs/FATEDFORTRESS_COMPLETE.md` Chapter 3.5 and Chapter 4 for details.
+
+---
+
+The Resume Is a Lie
+
+The modern professional identity is curated fiction. Bullet points are
+optimized narratives. LinkedIn is theater. Contribution graphs are
+gamed. Titles are inflated.
+
+We perform productivity. We simulate impact. We curate visibility.
+
+Fated Fortress exists to end the performance.
+
+------------------------------------------------------------------------
+
+Telemetry Is Signal
+
+What you say about yourself is noise. What you do is signal.
+
+The system captures: - Verified task execution - Code outcomes - Review
+feedback loops - Time-distributed effort - Reliability under constraint
+
+It does not capture: - Self-description - Social media narrative -
+Vanity metrics
+
+Telemetry is not engagement. Telemetry is contribution.
+
+------------------------------------------------------------------------
+
+Nothing Is Permanent Without Continued Signal
+
+Reputation is not a monument. It is a living system.
+
+If skills evolve, reputation must evolve. If practice stops, signal
+fades.
+
+Decay is temporal accuracy.
+
+------------------------------------------------------------------------
+
+XP Is Capability
+
+XP is multi-dimensional. You are not Level 50. You are Level 40 in
+backend architecture. Level 12 in distributed systems. Level 3 in
+interface design.
+
+XP is earned only through verified execution. Presence does not generate
+value. Output does.

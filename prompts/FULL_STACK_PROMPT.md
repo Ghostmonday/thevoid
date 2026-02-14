@@ -1,15 +1,15 @@
 # 🚀 FULL STACK DEVELOPMENT PROMPT
 
-Use this comprehensive prompt to generate the full FatedFortress/EXPNET platform.
+Use this comprehensive prompt to generate the full FatedFortress/FatedFortress platform.
 
 ---
 
 ```
-Build a complete, production-ready full-stack application for EXPNET (formerly FatedFortress), an AI-native collaboration platform for developers.
+Build a complete, production-ready full-stack application for FatedFortress (formerly FatedFortress), an AI-native collaboration platform for developers.
 
 ## PROJECT OVERVIEW
 
-**Name:** EXPNET  
+**Name:** FatedFortress  
 **Vision:** AI-native collaboration platform replacing resumes with XP-based reputation  
 **Core Features:**
 - XP-based reputation system (multi-axis experience tracking)

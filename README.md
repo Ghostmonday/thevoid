@@ -1,4 +1,4 @@
-# FatedFortress (EXPNET)
+# FatedFortress
 
 <p align="center">
   <img src="https://img.shields.io/badge/Status-Pre--Launch-yellow" alt="Status">
@@ -39,13 +39,13 @@ The modern professional identity is curated fiction. Bullet points are optimized
 | Item | Value |
 |------|-------|
 | **Primary Name** | FatedFortress (internal) |
-| **Public Brand** | EXPNET |
+| **Public Brand** | FatedFortress |
 | **Tagline** | "Build with people who actually ship." |
 | **Value Prop** | Turn solo developers into elite, execution-driven teams |
 | **Target Launch** | Q2 2026 |
 | **Tech Stack** | TypeScript/Node.js, React, PostgreSQL, Docker, Kubernetes |
 
-**FatedFortress** is a revolutionary developer collaboration platform that replaces visibility-based reputation with telemetry-driven truth. Instead of LinkedIn profiles and self-reported skills, it captures actual behavioral data—code contributions, task completions, code reviews, collaboration patterns—and builds multi-dimensional REP Profiles that reflect what you actually do, not what you claim.
+**FatedFortress** is a revolutionary developer collaboration platform that replaces visibility-based reputation with telemetry-driven truth. Instead of LinkedIn profiles and self-reported skills, it captures actual behavioral data—code contributions, task completions, code reviews, collaboration patterns—and builds multi-dimensional XP Profiles that reflect what you actually do, not what you claim.
 
 ---
 
@@ -87,7 +87,7 @@ What if your actual work was the only thing that mattered? Not your LinkedIn pro
 **Telemetry as truth** means:
 - Observable behavior is the primary input for reputation
 - What you say about your skills is noise; what you do is signal
-- The system captures actions—GitHub contributions, tasks, verified code reviews—and uses those to build REP Profiles
+- The system captures actions—GitHub contributions, tasks, verified code reviews—and uses those to build XP Profiles
 
 ### 3.2 The Execution Squad Model
 
@@ -127,7 +127,7 @@ These mantras guide every design decision:
    - Choice is yours—both paths are supported
 
 4. **"Teams form around execution, not credentials."**
-   - Matching on demonstrated REP Profiles
+   - Matching on demonstrated XP Profiles
    - Self-taught with strong XP has same opportunity as prestigious CS graduate
 
 ### 4.2 The Trust Gradient

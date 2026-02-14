@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Squads | Fated Fortress</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700&family=Satoshi:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root { --bg-primary: #F7F5F2; --bg-secondary: #FFFFFF; --bg-tertiary: #EDEAE5; --accent-primary: #1A1A2E; --accent-highlight: #C9A227; --accent-warm: #8B4513; --status-success: #2D5A27; --text-primary: #1A1A2E; --text-secondary: #4A4E69; --text-muted: #9A9EB0; --border-light: #E0DCD5; --sidebar-width: 260px; }
+        body { font-family: 'Satoshi', sans-serif; background: var(--bg-primary); color: var(--text-primary); min-height: 100vh; }
+        .topbar { background: var(--bg-secondary); border-bottom: 1px solid var(--border-light); padding: 16px 24px; display: flex; justify-content: space-between; align-items: center; position: fixed; top: 0; left: 0; right: 0; height: 69px; z-index: 100; transition: left 0.3s; }
+        .topbar.sidebar-expanded { left: var(--sidebar-width); }
+        .logo-section { display: flex; align-items: center; gap: 12px; }
+        .menu-toggle { width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; background: var(--bg-tertiary); border: none; border-radius: 8px; cursor: pointer; font-size: 18px; }
+        .logo-icon { width: 36px; height: 36px; position: relative; }
+        .logo-icon::before { content: ''; position: absolute; width: 100%; height: 100%; background: linear-gradient(135deg, var(--accent-highlight), var(--accent-warm)); clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%); }
+        .logo-text { font-family: 'Orbitron', sans-serif; font-size: 16px; font-weight: 700; letter-spacing: 3px; color: var(--accent-primary); }
+        .topbar-right { display: flex; align-items: center; gap: 16px; }
+        .search-box { display: flex; align-items: center; gap: 8px; background: var(--bg-tertiary); padding: 8px 16px; border-radius: 8px; }
+        .search-box input { border: none; background: transparent; outline: none; font-family: inherit; font-size: 13px; width: 180px; }
+        .nav-links { display: flex; gap: 16px; }
+        .nav-link { font-family: 'Orbitron', sans-serif; font-size: 10px; font-weight: 500; letter-spacing: 2px; color: var(--text-secondary); text-decoration: none; text-transform: uppercase; }
+        .nav-link:hover, .nav-link.active { color: var(--accent-highlight); }
+        .notification-btn { position: relative; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; background: var(--bg-tertiary); border: none; border-radius: 8px; cursor: pointer; }
+        .notification-badge { position: absolute; top: -4px; right: -4px; width: 18px; height: 18px; background: #8B0000; color: white; font-size: 10px; border-radius: 50%; }
+        .user-menu { display: flex; align-items: center; gap: 10px; padding: 6px 12px 6px 6px; background: var(--bg-tertiary); border-radius: 24px; cursor: pointer; }
+        .user-avatar { width: 28px; height: 28px; background: linear-gradient(135deg, var(--accent-highlight), var(--accent-warm)); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: 'Orbitron', sans-serif; font-size: 10px; font-weight: 700; color: white; }
+        .user-name { font-size: 12px; font-weight: 600; }
+        
+        .sidebar { position: fixed; top: 0; left: 0; bottom: 0; width: var(--sidebar-width); background: var(--bg-secondary); border-right: 1px solid var(--border-light); padding: 24px 16px; z-index: 99; }
+        .sidebar-section { margin-bottom: 24px; }
+        .sidebar-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; padding-bottom: 12px; border-bottom: 1px solid var(--border-light); }
+        .sidebar-title { font-family: 'Orbitron', sans-serif; font-size: 10px; font-weight: 600; letter-spacing: 2px; color: var(--text-muted); text-transform: uppercase; }
+        .collapse-btn { width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; background: transparent; border: none; cursor: pointer; color: var(--text-muted); font-size: 14px; }
+        .nav-group { margin-bottom: 16px; }
+        .nav-section-title { font-family: 'Orbitron', sans-serif; font-size: 9px; font-weight: 600; letter-spacing: 2px; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px; padding-left: 12px; }
+        .nav-item { display: flex; align-items: center; gap: 12px; padding: 12px 16px; margin: 4px 0; border-radius: 8px; cursor: pointer; transition: all 0.2s; font-size: 14px; font-weight: 500; color: var(--text-secondary); text-decoration: none; white-space: nowrap; }
+        .nav-item:hover { background: var(--bg-tertiary); color: var(--accent-primary); }
+        .nav-item.active { background: linear-gradient(135deg, rgba(201, 162, 39, 0.1), rgba(139, 69, 19, 0.05)); color: var(--accent-highlight); border-left: 3px solid var(--accent-highlight); }
+        .nav-icon { width: 20px; display: flex; align-items: center; justify-content: center; font-size: 14px; }
+        .nav-badge { margin-left: auto; background: var(--accent-highlight); color: white; font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 10px; }
+        .guild-info { background: linear-gradient(135deg, var(--accent-primary), #2D2D4A); border-radius: 12px; padding: 20px; color: white; margin-top: auto; }
+        .guild-info-title { font-family: 'Orbitron', sans-serif; font-size: 11px; font-weight: 600; letter-spacing: 2px; margin-bottom: 12px; }
+        .guild-info-stats { display: flex; gap: 16px; }
+        .guild-info-stat { text-align: center; }
+        .guild-info-stat-value { font-family: 'Orbitron', sans-serif; font-size: 18px; font-weight: 700; color: var(--accent-highlight); }
+        .guild-info-stat-label { font-size: 9px; opacity: 0.7; text-transform: uppercase; }
+        
+        .main-container { margin-top: 69px; min-height: calc(100vh - 69px); transition: margin-left 0.3s; }
+        .main-container.sidebar-expanded { margin-left: var(--sidebar-width); }
+        .content { padding: 32px; max-width: 1400px; margin: 0 auto; }
+        
+        .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px; }
+        .page-title-section h1 { font-family: 'Orbitron', sans-serif; font-size: 28px; font-weight: 700; color: var(--accent-primary); letter-spacing: 2px; }
+        .page-title-section p { font-size: 14px; color: var(--text-muted); margin-top: 4px; }
+        
+        .btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; border-radius: 8px; font-family: 'Satoshi', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s; border: none; text-decoration: none; }
+        .btn-primary { background: linear-gradient(135deg, var(--accent-highlight), var(--accent-warm)); color: white; }
+        
+        .squads-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; }
+        
+        .squad-card { background: var(--bg-secondary); border: 1px solid var(--border-light); border-radius: 16px; padding: 28px; transition: all 0.3s; }
+        .squad-card:hover { border-color: var(--accent-highlight); transform: translateY(-2px); box-shadow: 0 8px 30px rgba(0,0,0,0.08); }
+        
+        .squad-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .squad-name { font-family: 'Orbitron', sans-serif; font-size: 18px; font-weight: 700; color: var(--accent-primary); letter-spacing: 2px; }
+        .squad-badge { font-size: 10px; font-weight: 600; letter-spacing: 1px; padding: 4px 12px; border-radius: 20px; background: rgba(45, 90, 39, 0.1); color: var(--status-success); }
+        
+        .squad-stats { display: flex; gap: 24px; margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px solid var(--border-light); }
+        .squad-stat { text-align: center; }
+        .squad-stat-value { font-family: 'Orbitron', sans-serif; font-size: 24px; font-weight: 700; color: var(--accent-highlight); }
+        .squad-stat-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
+        
+        .squad-members { display: flex; -webkit-flex-direction: column; flex-direction: column; gap: 12px; }
+        .squad-member { display: flex; align-items: center; gap: 12px; padding: 12px; background: var(--bg-tertiary); border-radius: 8px; }
+        .squad-member-avatar { width: 36px; height: 36px; background: linear-gradient(135deg, var(--accent-highlight), var(--accent-warm)); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: 'Orbitron', sans-serif; font-size: 11px; font-weight: 700; color: white; }
+        .squad-member-info { flex: 1; }
+        .squad-member-name { font-size: 13px; font-weight: 600; color: var(--text-primary); }
+        .squad-member-role { font-size: 11px; color: var(--text-muted); }
+        .squad-member-score { font-family: 'Orbitron', sans-serif; font-size: 14px; font-weight: 700; color: var(--accent-highlight); }
+        
+        .progress-container { margin-top: 20px; }
+        .progress-header { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 11px; }
+        .progress-label { font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 1px; }
+        .progress-value { font-family: 'Orbitron', sans-serif; font-weight: 600; color: var(--accent-primary); }
+        .progress-bar { height: 8px; background: var(--bg-tertiary); border-radius: 4px; overflow: hidden; }
+        .progress-fill { height: 100%; border-radius: 4px; background: linear-gradient(90deg, var(--accent-highlight), var(--accent-warm)); }
+        
+        @media (max-width: 1024px) { .squads-grid { grid-template-columns: 1fr; } }
+        @media (max-width: 768px) { .sidebar { transform: translateX(-100%); } .topbar { left: 0 !important; } .main-container { margin-left: 0 !important; } .nav-links { display: none; } }
+    </style>
+</head>
+<body>
+    <nav class="topbar sidebar-expanded">
+        <div class="logo-section">
+            <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
+            <div class="logo-icon"></div>
+            <span class="logo-text">FATED FORTRESS</span>
+        </div>
+        <div class="topbar-right">
+            <div class="search-box"><span>🔍</span><input type="text" placeholder="Search..." /></div>
+            <div class="nav-links">
+                <a href="dashboard.html" class="nav-link">Dashboard</a>
+                <a href="guild.html" class="nav-link">The Guild</a>
+                <a href="quests.html" class="nav-link">Quests</a>
+                <a href="squads.html" class="nav-link active">Squads</a>
+            </div>
+            <button class="notification-btn">🔔<span class="notification-badge">3</span></button>
+            <div class="user-menu"><div class="user-avatar">E3</div><span class="user-name">e394ace6</span></div>
+        </div>
+    </nav>
+
+    <aside class="sidebar expanded" id="sidebar">
+        <div class="sidebar-section">
+            <div class="sidebar-header"><span class="sidebar-title">Navigation</span><button class="collapse-btn" onclick="toggleSidebar()">◀</button></div>
+            <div class="nav-group">
+                <div class="nav-section-title">Main</div>
+                <a href="dashboard.html" class="nav-item"><span class="nav-icon">⌂</span><span>Dashboard</span></a>
+                <a href="guild.html" class="nav-item"><span class="nav-icon">⚔</span><span>The Guild</span></a>
+                <a href="quests.html" class="nav-item"><span class="nav-icon">📜</span><span>Quest Board</span><span class="nav-badge">14</span></a>
+                <a href="squads.html" class="nav-item active"><span class="nav-icon">👥</span><span>Squads</span></a>
+            </div>
+            <div class="nav-group">
+                <div class="nav-section-title">Finance</div>
+                <a href="ledger.html" class="nav-item"><span class="nav-icon">💰</span><span>Ledger</span></a>
+                <a href="leaderboard.html" class="nav-item"><span class="nav-icon">🏆</span><span>Leaderboard</span></a>
+            </div>
+            <div class="nav-group">
+                <div class="nav-section-title">System</div>
+                <a href="profile.html" class="nav-item"><span class="nav-icon">👤</span><span>Profile</span></a>
+                <a href="settings.html" class="nav-item"><span class="nav-icon">⚙</span><span>Settings</span></a>
+                <a href="cemetery.html" class="nav-item"><span class="nav-icon">❌</span><span>Cemetery</span></a>
+            </div>
+        </div>
+        <div class="guild-info">
+            <div class="guild-info-title">⚔ GUILD STATS</div>
+            <div class="guild-info-stats">
+                <div class="guild-info-stat"><div class="guild-info-stat-value">32</div><div class="guild-info-stat-label">Builders</div></div>
+                <div class="guild-info-stat"><div class="guild-info-stat-value">14</div><div class="guild-info-stat-label">Quests</div></div>
+                <div class="guild-info-stat"><div class="guild-info-stat-value">634</div><div class="guild-info-stat-label">REP</div></div>
+            </div>
+        </div>
+    </aside>
+
+    <div class="main-container sidebar-expanded" id="mainContainer">
+        <main class="content">
+            <div class="page-header">
+                <div class="page-title-section">
+                    <h1>👥 SQUADS</h1>
+                    <p>4 active squads • 32 total builders</p>
+                </div>
+                <button class="btn btn-primary">+ Form Squad</button>
+            </div>
+            
+            <div class="squads-grid">
+                <div class="squad-card">
+                    <div class="squad-header">
+                        <span class="squad-name">ALPHA SQUAD</span>
+                        <span class="squad-badge">DEPLOYMENT READY</span>
+                    </div>
+                    <div class="squad-stats">
+                        <div class="squad-stat"><div class="squad-stat-value">247</div><div class="squad-stat-label">Power</div></div>
+                        <div class="squad-stat"><div class="squad-stat-value">3</div><div class="squad-stat-label">Members</div></div>
+                        <div class="squad-stat"><div class="squad-stat-value">12</div><div class="squad-stat-label">Quests</div></div>
+                    </div>
+                    <div class="squad-members">
+                        <div class="squad-member">
+                            <div class="squad-member-avatar">7D</div>
+                            <div class="squad-member-info"><div class="squad-member-name">7d3c1e8a</div><div class="squad-member-role">Squad Leader</div></div>
+                            <div class="squad-member-score">92.5</div>
+                        </div>
+                        <div class="squad-member">
+                            <div class="squad-member-avatar">E3</div>
+                            <div class="squad-member-info"><div class="squad-member-name">e394ace6</div><div class="squad-member-role">Member</div></div>
+                            <div class="squad-member-score">87.2</div>
+                        </div>
+                        <div class="squad-member">
+                            <div class="squad-member-avatar">9A</div>
+                            <div class="squad-member-info"><div class="squad-member-name">9a2b5c7d</div><div class="squad-member-role">Member</div></div>
+                            <div class="squad-member-score">67.3</div>
+                        </div>
+                    </div>
+                    <div class="progress-container">
+                        <div class="progress-header"><span class="progress-label">Quest Progress</span><span class="progress-value">82%</span></div>
+                        <div class="progress-bar"><div class="progress-fill" style="width: 82%;"></div></div>
+                    </div>
+                </div>
+                
+                <div class="squad-card">
+                    <div class="squad-header">
+                        <span class="squad-name">BETA SQUAD</span>
+                        <span class="squad-badge" style="background: rgba(184, 134, 11, 0.1); color: #B8860B;">IN PROGRESS</span>
+                    </div>
+                    <div class="squad-stats">
+                        <div class="squad-stat"><div class="squad-stat-value">189</div><div class="squad-stat-label">Power</div></div>
+                        <div class="squad-stat"><div class="squad-stat-value">4</div><div class="squad-stat-label">Members</div></div>
+                        <div class="squad-stat"><div class="squad-stat-value">8</div><div class="squad-stat-label">Quests</div></div>
+                    </div>
+                    <div class="squad-members">
+                        <div class="squad-member">
+                            <div class="squad-member-avatar">68</div>
+                            <div class="squad-member-info"><div class="squad-member-name">6860a9f2</div><div class="squad-member-role">Squad Leader</div></div>
+                            <div class="squad-member-score">78.4</div>
+                        </div>
+                        <div class="squad-member">
+                            <div class="squad-member-avatar">3F</div>
+                            <div class="squad-member-info"><div class="squad-member-name">3f2d1c0b</div><div class="squad-member-role">Member</div></div>
+                            <div class="squad-member-score">56.2</div>
+                        </div>
+                    </div>
+                    <div class="progress-container">
+                        <div class="progress-header"><span class="progress-label">Quest Progress</span><span class="progress-value">45%</span></div>
+                        <div class="progress-bar"><div class="progress-fill" style="width: 45%;"></div></div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    <script>function toggleSidebar(){const s=document.getElementById('sidebar');const t=document.querySelector('.topbar');const m=document.getElementById('mainContainer');s.classList.toggle('collapsed');t.classList.toggle('sidebar-expanded');m.classList.toggle('sidebar-expanded');}</script>
+</body>
+</html>

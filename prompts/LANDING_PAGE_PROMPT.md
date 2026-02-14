@@ -5,11 +5,11 @@ Use this prompt with ChatGPT, Claude, or Gemini to generate a production-ready l
 ---
 
 ```
-Build a complete, production-ready landing page for EXPNET (formerly FatedFortress), an AI-native collaboration platform for developers.
+Build a complete, production-ready landing page for FatedFortress (formerly FatedFortress), an AI-native collaboration platform for developers.
 
 ## COMPANY INFO
 
-**Name:** EXPNET  
+**Name:** FatedFortress  
 **Tagline:** Build with people who actually ship  
 **Value Prop:** Turn solo developers into elite, execution-driven teams  
 **Target Audience:** Independent developers, startup founders, early engineers, builders tired of resumes, LinkedIn, and hiring theater  
@@ -79,7 +79,7 @@ Build a complete, production-ready landing page for EXPNET (formerly FatedFortre
 
 ### 10. FOOTER
 - Navigation: About | Privacy | Terms | GitHub | Twitter
-- Copyright: "© 2026 EXPNET. Built by builders, for builders."
+- Copyright: "© 2026 FatedFortress. Built by builders, for builders."
 - Made with love badge
 
 ## DESIGN SPECIFICATIONS
@@ -132,10 +132,10 @@ Return a single, complete HTML file with:
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EXPNET - Build With People Who Actually Ship</title>
+    <title>FatedFortress - Build With People Who Actually Ship</title>
     <meta name="description" content="AI-native collaboration platform for developers. XP-based reputation, anonymous participation, AI matching.">
     <!-- Open Graph -->
-    <meta property="og:title" content="EXPNET - Build With People Who Actually Ship">
+    <meta property="og:title" content="FatedFortress - Build With People Who Actually Ship">
     <meta property="og:description" content="Turn solo developers into elite, execution-driven teams.">
     <meta property="og:type" content="website">
     <style>

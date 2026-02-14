@@ -13,7 +13,7 @@ You have a solid platform concept with comprehensive documentation. The challeng
 1. **Now**: Launch landing page with pre-launch signup (2-4 hours)
 2. **Today**: Capture emails, validate demand, begin community building
 3. **This Week**: First revenue through strategic partnerships or consulting
-4. **This MONTH**: Sustainable revenue model operational
+4. **This Month**: Sustainable revenue model operational
 
 ---
 
@@ -23,7 +23,7 @@ You have a solid platform concept with comprehensive documentation. The challeng
 
 **Option A: Hostinger AI Website Builder**
 
-Use the prompt I created earlier:
+Use this prompt to build your landing page:
 
 ```
 Build a bold, modern, developer-focused website for a startup called FatedFortress.
@@ -153,61 +153,56 @@ Include CTAs:
 ```
 
 **Deploy to Hostinger:**
-1. Copy HTML above
+
+1. Copy the HTML above
 2. Upload as `index.html`
-3. Point domain to hosting
+3. Point your domain to the hosting
 4. **Time: 15-30 minutes**
 
 ### 1.2 Email Capture Setup
 
 **Free Options:**
-- **Formspree**: https://formspree.io (free tier: 1000 submissions/month)
+
+- **Formspree**: https://formspree.io (free tier: 1,000 submissions/month)
 - **Netlify Forms**: If hosting on Netlify (free)
 - **Google Forms**: Simple, free, integrates with Sheets
 
 **Setup Formspree:**
-1. Create account at formspree.io
-2. Create new form
-3. Replace `YOUR_FORM_HANDLER` in HTML with your Formspree endpoint
-4. Emails go to your inbox, stored in Formspree dashboard
+
+1. Create an account at formspree.io
+2. Create a new form
+3. Replace `YOUR_FORM_HANDLER` in the HTML with your Formspree endpoint
+4. Emails go to your inbox and are stored in the Formspree dashboard
 
 ### 1.3 Quick Verification
 
 **Before sunrise, verify:**
-- [ ] Landing page loads
+
+- [ ] Landing page loads correctly
 - [ ] Email form captures submissions
-- [ ] Mobile display looks okay
-- [ ] Page speed under 3 seconds
+- [ ] Mobile display looks acceptable
+- [ ] Page speed is under 3 seconds
 
 ---
 
 ## Part 2: Immediate Monetization (This Week)
 
-### 2.1 Consulting/Service Revenue (Fastest to Revenue)
+### 2.1 Consulting/Service Revenue (Fastest Path to Revenue)
 
-**Your Advantage:**
 You have expertise in AI-native platforms, trust systems, and developer collaboration. Companies need this.
 
 **Service Offerings:**
 
-**Option A: Platform Design Consulting**
-- Help companies design reputation/trust systems
-- Rate: $150-300/hour
-- Deliverable: System design document
-
-**Option B: AI Integration Strategy**
-- Help companies integrate AI into their workflows
-- Rate: $200-400/hour
-- Deliverable: Strategy roadmap + implementation plan
-
-**Option C: Technical Architecture Review**
-- Review developer collaboration platforms
-- Rate: $175-350/hour
-- Deliverable: Architecture assessment + recommendations
+| Offering | Rate | Deliverable |
+|----------|------|--------------|
+| Platform Design Consulting | $150-300/hour | System design document |
+| AI Integration Strategy | $200-400/hour | Strategy roadmap + implementation plan |
+| Technical Architecture Review | $175-350/hour | Architecture assessment + recommendations |
 
 **Action Steps:**
-1. Post on LinkedIn, Twitter, relevant communities
-2. Offer "free 30-minute strategy call" to capture leads
+
+1. Post on LinkedIn, Twitter, and relevant communities
+2. Offer a "free 30-minute strategy call" to capture leads
 3. Convert 20% of calls to paid engagements
 4. **Target: First paid engagement within 7 days**
 
@@ -242,43 +237,46 @@ Offer paid early access to your platform:
 | Tier | Price | Benefits |
 |------|-------|----------|
 | Pioneer | $99 | Lifetime 20% discount, founding member badge, direct input on features |
-| Champion | $299 | Pioneer benefits + 1hr consulting call + early API access |
+| Champion | $299 | Pioneer benefits + 1-hour consulting call + early API access |
 | Founder | $999 | All Champion benefits + advisory board seat + custom integration |
 
 **Implementation:**
+
 1. Update landing page with pricing tiers
-2. Use Stripe Payment Links (free to set up, 2.9% + $0.30 per transaction)
-3. Collect emails, send payment links
+2. Use Stripe Payment Links (free to set up; 2.9% + $0.30 per transaction)
+3. Collect emails and send payment links
 4. **Target: $2,000-5,000 in first 30 days**
 
 **Stripe Setup:**
-1. Create Stripe account (stripe.com)
+
+1. Create a Stripe account at stripe.com
 2. Create products for each tier
 3. Generate payment links
-4. Add links to landing page
+4. Add links to your landing page
 
 ### 2.3 Content Monetization (Within 60 Days)
 
 **High-Value Content Assets:**
 
-**1. "How to Build Trust in Remote Teams" - Guide**
-- 20-page PDF guide
-- Sell for $47-97
-- Target: Engineers, product managers, founders
+1. **"How to Build Trust in Remote Teams" — Guide**
+   - 20-page PDF
+   - Price: $47-97
+   - Target: Engineers, product managers, founders
 
-**2. "AI-Native Platform Design" - Course**
-- 8 video modules
-- Sell for $197-497
-- Target: CTOs, platform engineers, founders
+2. **"AI-Native Platform Design" — Course**
+   - 8 video modules
+   - Price: $197-497
+   - Target: CTOs, platform engineers, founders
 
-**3. Newsletter (Weekly)**
-- Build audience
-- Monetize through sponsorships ($500-2000/sponsor email)
-- 10,000 subscribers = $60,000+/year potential
+3. **Newsletter (Weekly)**
+   - Build an audience
+   - Monetize through sponsorships ($500-2,000 per sponsor email)
+   - 10,000 subscribers = $60,000+/year potential
 
 **Action Steps:**
-1. Write first newsletter this week
-2. Add email capture to landing page
+
+1. Write your first newsletter this week
+2. Add email capture to your landing page
 3. Promote in developer communities
 4. **Target: 1,000 subscribers in 30 days**
 
@@ -296,31 +294,36 @@ Offer paid early access to your platform:
 | Enterprise | $99/month | Custom integrations, dedicated support, SLA |
 
 **Revenue Projection:**
+
 - 1,000 free users → 5% convert to Pro = 50 × $9 = $450/month
 - 100 teams → 10 convert to Team = 10 × $29 = $290/month
-- **Total: $740/month (Year 1 conservative)**
+- **Total: $740/month (Year 1 conservative estimate)**
 
 ### 3.2 Transaction/Commission Model
 
 **Project Commission:**
+
 - Take 5-10% of project value when payment is involved
-- Works for freelance/marketplace projects
+- Works for freelance and marketplace projects
 - Example: $10,000 project → $500-1,000 commission
 
 **Implementation:**
+
 - Integrate Stripe Connect for marketplace payments
-- Escrow funds, release on completion
+- Hold funds in escrow and release on completion
 - **Target: 10 projects/month = $5,000-10,000/month**
 
 ### 3.3 Enterprise/B2B Model
 
 **Enterprise Platform License:**
-- Annual license for companies to use platform internally
+
+- Annual license for companies to use the platform internally
 - Price: $5,000-50,000/year based on seats
 - Target: 5-10 enterprise customers
 - **Target: $50,000-500,000/year**
 
 **Value Proposition for Enterprises:**
+
 - Internal talent discovery without resumes
 - Cross-team collaboration management
 - Developer experience insights
@@ -329,10 +332,11 @@ Offer paid early access to your platform:
 ### 3.4 Data/Insights Product (Advanced)
 
 **Anonymized Market Insights:**
+
 - Aggregate trends (technologies, skills in demand)
 - Compensation benchmarks
 - Talent mobility patterns
-- Sell to HR tech, investors, enterprises
+- Sell to HR tech companies, investors, and enterprises
 - **Revenue: $10,000-100,000/report**
 
 ---
@@ -342,7 +346,7 @@ Offer paid early access to your platform:
 ### Tonight (Before Sunrise)
 
 - [ ] Deploy landing page (HTML or AI builder)
-- [ ] Set up email capture (Formspree/Stripe)
+- [ ] Set up email capture (Formspree)
 - [ ] Post on social media announcing "Coming Soon"
 - [ ] Send to 10 people you know: "Check this out"
 
@@ -358,8 +362,8 @@ Offer paid early access to your platform:
 
 - [ ] Hit 1,000 email signups
 - [ ] Close $2,000+ in revenue (consulting + early access)
-- [ ] Get first 10 users to platform
-- [ ] Begin MVP development (or find technical co-founder)
+- [ ] Get first 10 users on the platform
+- [ ] Begin MVP development (or find a technical co-founder)
 
 ### This Quarter
 
@@ -370,13 +374,13 @@ Offer paid early access to your platform:
 
 ---
 
-## Part 5: Resource清单
+## Part 5: Resource List
 
 ### Free Tools for Launch
 
 | Purpose | Tool | Cost |
 |---------|------|------|
-| Landing Page | Hostinger AI / Static HTML | Free- hosting |
+| Landing Page | Hostinger AI / Static HTML | Free (hosting costs may apply) |
 | Email Capture | Formspree / Google Forms | Free |
 | Payments | Stripe | 2.9% + $0.30 |
 | Newsletter | Substack / Beehiiv | Free |
@@ -400,24 +404,28 @@ Offer paid early access to your platform:
 ## Part 6: Realistic Timeline
 
 ### Phase 1: Validation (Week 1-2)
+
 - Launch landing page
 - Capture 500+ emails
 - Validate demand signals
 - **Revenue: $0 | Investment: $50 (domain + hosting)**
 
 ### Phase 2: First Revenue (Week 3-6)
+
 - Launch consulting/offerings
 - Close first paying clients
 - Pre-sell early access
 - **Revenue: $2,000-5,000 | Investment: $100**
 
 ### Phase 3: Traction (Month 2-3)
+
 - Launch MVP
 - Build user base
 - Establish recurring revenue
 - **Revenue: $5,000-10,000/month | Investment: $1,000-5,000**
 
 ### Phase 4: Growth (Month 4-6)
+
 - Scale user acquisition
 - Expand offerings
 - Enterprise sales
@@ -427,21 +435,21 @@ Offer paid early access to your platform:
 
 ## Critical Success Factors
 
-### What MUST Happen
+### What Must Happen
 
-1. **Launch TONIGHT** - Perfect is the enemy of done
-2. **Email capture** - Build audience from day one
-3. **Revenue THIS WEEK** - Consulting, pre-sales, anything
-4. **Consistent posting** - 3x/week minimum on social
-5. **Talk to users** - Every conversation is a potential customer
+1. **Launch TONIGHT** — Perfect is the enemy of done
+2. **Email capture** — Build your audience from day one
+3. **Revenue THIS WEEK** — Consulting, pre-sales, anything counts
+4. **Consistent posting** — 3x/week minimum on social
+5. **Talk to users** — Every conversation is a potential customer
 
 ### What to Avoid
 
-1. **Perfectionism** - Ship ugly, fix later
-2. **Going silent** - Consistent presence matters
-3. **Doing everything** - Focus on one revenue stream first
-4. **Waiting for funding** - Bootstrap first, raise later
-5. **Ignoring feedback** - User feedback = product direction
+1. **Perfectionism** — Ship ugly, fix later
+2. **Going silent** — Consistent presence matters
+3. **Doing everything** — Focus on one revenue stream first
+4. **Waiting for funding** — Bootstrap first, raise later
+5. **Ignoring feedback** — User feedback = product direction
 
 ---
 
@@ -449,7 +457,7 @@ Offer paid early access to your platform:
 
 ### Right Now (Next 30 Minutes)
 
-1. **Buy domain** - expnet.io, fatedfortress.io, or similar
+1. **Buy a domain** — expnet.io, fatedfortress.io, or similar
 2. **Copy landing page HTML** above
 3. **Deploy to Netlify/Vercel/Hostinger**
 4. **Send to 5 people**
@@ -463,7 +471,7 @@ Offer paid early access to your platform:
 
 ### Tomorrow Morning
 
-1. **Check email captures** - respond to everyone
+1. **Check email captures** — respond to everyone
 2. **Write first newsletter** announcing launch
 3. **Reach out to 3 potential consulting clients**
 4. **Begin Stripe setup**

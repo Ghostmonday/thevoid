@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leaderboard | Fated Fortress</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700&family=Satoshi:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root { --bg-primary: #F7F5F2; --bg-secondary: #FFFFFF; --bg-tertiary: #EDEAE5; --accent-primary: #1A1A2E; --accent-highlight: #C9A227; --accent-warm: #8B4513; --text-primary: #1A1A2E; --text-secondary: #4A4E69; --text-muted: #9A9EB0; --border-light: #E0DCD5; --sidebar-width: 260px; }
+        body { font-family: 'Satoshi', sans-serif; background: var(--bg-primary); color: var(--text-primary); min-height: 100vh; }
+        .topbar { background: var(--bg-secondary); border-bottom: 1px solid var(--border-light); padding: 16px 24px; display: flex; justify-content: space-between; align-items: center; position: fixed; top: 0; left: 0; right: 0; height: 69px; z-index: 100; transition: left 0.3s; }
+        .topbar.sidebar-expanded { left: var(--sidebar-width); }
+        .logo-section { display: flex; align-items: center; gap: 12px; }
+        .menu-toggle { width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; background: var(--bg-tertiary); border: none; border-radius: 8px; cursor: pointer; font-size: 18px; }
+        .logo-icon { width: 36px; height: 36px; position: relative; }
+        .logo-icon::before { content: ''; position: absolute; width: 100%; height: 100%; background: linear-gradient(135deg, var(--accent-highlight), var(--accent-warm)); clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%); }
+        .logo-text { font-family: 'Orbitron', sans-serif; font-size: 16px; font-weight: 700; letter-spacing: 3px; color: var(--accent-primary); }
+        .topbar-right { display: flex; align-items: center; gap: 16px; }
+        .search-box { display: flex; align-items: center; gap: 8px; background: var(--bg-tertiary); padding: 8px 16px; border-radius: 8px; }
+        .search-box input { border: none; background: transparent; outline: none; font-family: inherit; font-size: 13px; width: 180px; }
+        .nav-links { display: flex; gap: 16px; }
+        .nav-link { font-family: 'Orbitron', sans-serif; font-size: 10px; font-weight: 500; letter-spacing: 2px; color: var(--text-secondary); text-decoration: none; text-transform: uppercase; }
+        .nav-link:hover, .nav-link.active { color: var(--accent-highlight); }
+        .notification-btn { position: relative; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; background: var(--bg-tertiary); border: none; border-radius: 8px; cursor: pointer; }
+        .notification-badge { position: absolute; top: -4px; right: -4px; width: 18px; height: 18px; background: #8B0000; color: white; font-size: 10px; border-radius: 50%; }
+        .user-menu { display: flex; align-items: center; gap: 10px; padding: 6px 12px 6px 6px; background: var(--bg-tertiary); border-radius: 24px; cursor: pointer; }
+        .user-avatar { width: 28px; height: 28px; background: linear-gradient(135deg, var(--accent-highlight), var(--accent-warm)); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: 'Orbitron', sans-serif; font-size: 10px; font-weight: 700; color: white; }
+        .user-name { font-size: 12px; font-weight: 600; }
+        
+        .sidebar { position: fixed; top: 0; left: 0; bottom: 0; width: var(--sidebar-width); background: var(--bg-secondary); border-right: 1px solid var(--border-light); padding: 24px 16px; z-index: 99; }
+        .sidebar-section { margin-bottom: 24px; }
+        .sidebar-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; padding-bottom: 12px; border-bottom: 1px solid var(--border-light); }
+        .sidebar-title { font-family: 'Orbitron', sans-serif; font-size: 10px; font-weight: 600; letter-spacing: 2px; color: var(--text-muted); text-transform: uppercase; }
+        .collapse-btn { width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; background: transparent; border: none; cursor: pointer; color: var(--text-muted); font-size: 14px; }
+        .nav-group { margin-bottom: 16px; }
+        .nav-section-title { font-family: 'Orbitron', sans-serif; font-size: 9px; font-weight: 600; letter-spacing: 2px; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px; padding-left: 12px; }
+        .nav-item { display: flex; align-items: center; gap: 12px; padding: 12px 16px; margin: 4px 0; border-radius: 8px; cursor: pointer; transition: all 0.2s; font-size: 14px; font-weight: 500; color: var(--text-secondary); text-decoration: none; white-space: nowrap; }
+        .nav-item:hover { background: var(--bg-tertiary); color: var(--accent-primary); }
+        .nav-item.active { background: linear-gradient(135deg, rgba(201, 162, 39, 0.1), rgba(139, 69, 19, 0.05)); color: var(--accent-highlight); border-left: 3px solid var(--accent-highlight); }
+        .nav-icon { width: 20px; display: flex; align-items: center; justify-content: center; font-size: 14px; }
+        .nav-badge { margin-left: auto; background: var(--accent-highlight); color: white; font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 10px; }
+        .guild-info { background: linear-gradient(135deg, var(--accent-primary), #2D2D4A); border-radius: 12px; padding: 20px; color: white; margin-top: auto; }
+        .guild-info-title { font-family: 'Orbitron', sans-serif; font-size: 11px; font-weight: 600; letter-spacing: 2px; margin-bottom: 12px; }
+        .guild-info-stats { display: flex; gap: 16px; }
+        .guild-info-stat { text-align: center; }
+        .guild-info-stat-value { font-family: 'Orbitron', sans-serif; font-size: 18px; font-weight: 700; color: var(--accent-highlight); }
+        .guild-info-stat-label { font-size: 9px; opacity: 0.7; text-transform: uppercase; }
+        
+        .main-container { margin-top: 69px; min-height: calc(100vh - 69px); transition: margin-left 0.3s; }
+        .main-container.sidebar-expanded { margin-left: var(--sidebar-width); }
+        .content { padding: 32px; max-width: 1200px; margin: 0 auto; }
+        
+        .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px; }
+        .page-title-section h1 { font-family: 'Orbitron', sans-serif; font-size: 28px; font-weight: 700; color: var(--accent-primary); letter-spacing: 2px; }
+        .page-title-section p { font-size: 14px; color: var(--text-muted); margin-top: 4px; }
+        
+        .time-filters { display: flex; gap: 8px; }
+        .time-btn { padding: 8px 16px; border-radius: 20px; font-size: 11px; font-weight: 600; cursor: pointer; border: 1px solid var(--border-light); background: var(--bg-secondary); color: var(--text-secondary); transition: all 0.2s; }
+        .time-btn:hover, .time-btn.active { background: var(--accent-highlight); color: white; border-color: var(--accent-highlight); }
+        
+        .leaderboard-card { background: var(--bg-secondary); border: 1px solid var(--border-light); border-radius: 16px; overflow: hidden; }
+        .leaderboard-header { display: grid; grid-template-columns: 60px 1fr 120px 100px; padding: 16px 24px; background: var(--bg-tertiary); border-bottom: 1px solid var(--border-light); font-family: 'Orbitron', sans-serif; font-size: 10px; font-weight: 600; letter-spacing: 2px; color: var(--text-muted); text-transform: uppercase; }
+        
+        .leaderboard-row { display: grid; grid-template-columns: 60px 1fr 120px 100px; padding: 16px 24px; align-items: center; border-bottom: 1px solid var(--border-light); transition: background 0.2s; }
+        .leaderboard-row:last-child { border-bottom: none; }
+        .leaderboard-row:hover { background: var(--bg-tertiary); }
+        
+        .rank { font-family: 'Orbitron', sans-serif; font-size: 18px; font-weight: 700; }
+        .rank.gold { color: #C9A227; }
+        .rank.silver { color: #8E8E93; }
+        .rank.bronze { color: #CD7F32; }
+        
+        .builder-info { display: flex; align-items: center; gap: 12px; }
+        .builder-avatar { width: 40px; height: 40px; background: var(--bg-tertiary); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: 'Orbitron', sans-serif; font-size: 12px; font-weight: 700; color: var(--text-secondary); }
+        .builder-name { font-size: 14px; font-weight: 600; color: var(--text-primary); }
+        .builder-squad { font-size: 11px; color: var(--text-muted); }
+        
+        .quest-count { font-size: 13px; color: var(--text-secondary); }
+        
+        .rep-score { font-family: 'Orbitron', sans-serif; font-size: 18px; font-weight: 700; color: var(--accent-highlight); }
+        
+        @media (max-width: 768px) { .sidebar { transform: translateX(-100%); } .topbar { left: 0 !important; } .main-container { margin-left: 0 !important; } .nav-links { display: none; } .leaderboard-header, .leaderboard-row { grid-template-columns: 50px 1fr 80px; } .quest-count { display: none; } }
+    </style>
+</head>
+<body>
+    <nav class="topbar sidebar-expanded">
+        <div class="logo-section">
+            <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
+            <div class="logo-icon"></div>
+            <span class="logo-text">FATED FORTRESS</span>
+        </div>
+        <div class="topbar-right">
+            <div class="nav-links">
+                <a href="dashboard.html" class="nav-link">Dashboard</a>
+                <a href="guild.html" class="nav-link">The Guild</a>
+                <a href="quests.html" class="nav-link">Quests</a>
+                <a href="squads.html" class="nav-link">Squads</a>
+            </div>
+            <button class="notification-btn">🔔<span class="notification-badge">3</span></button>
+            <div class="user-menu"><div class="user-avatar">E3</div><span class="user-name">e394ace6</span></div>
+        </div>
+    </nav>
+
+    <aside class="sidebar expanded" id="sidebar">
+        <div class="sidebar-section">
+            <div class="sidebar-header"><span class="sidebar-title">Navigation</span><button class="collapse-btn" onclick="toggleSidebar()">◀</button></div>
+            <div class="nav-group">
+                <div class="nav-section-title">Main</div>
+                <a href="dashboard.html" class="nav-item"><span class="nav-icon">⌂</span><span>Dashboard</span></a>
+                <a href="guild.html" class="nav-item"><span class="nav-icon">⚔</span><span>The Guild</span></a>
+                <a href="quests.html" class="nav-item"><span class="nav-icon">📜</span><span>Quest Board</span><span class="nav-badge">14</span></a>
+                <a href="squads.html" class="nav-item"><span class="nav-icon">👥</span><span>Squads</span></a>
+            </div>
+            <div class="nav-group">
+                <div class="nav-section-title">Finance</div>
+                <a href="ledger.html" class="nav-item"><span class="nav-icon">💰</span><span>Ledger</span></a>
+                <a href="leaderboard.html" class="nav-item active"><span class="nav-icon">🏆</span><span>Leaderboard</span></a>
+            </div>
+            <div class="nav-group">
+                <div class="nav-section-title">System</div>
+                <a href="profile.html" class="nav-item"><span class="nav-icon">👤</span><span>Profile</span></a>
+                <a href="settings.html" class="nav-item"><span class="nav-icon">⚙</span><span>Settings</span></a>
+                <a href="cemetery.html" class="nav-item"><span class="nav-icon">❌</span><span>Cemetery</span></a>
+            </div>
+        </div>
+        <div class="guild-info">
+            <div class="guild-info-title">⚔ GUILD STATS</div>
+            <div class="guild-info-stats">
+                <div class="guild-info-stat"><div class="guild-info-stat-value">32</div><div class="guild-info-stat-label">Builders</div></div>
+                <div class="guild-info-stat"><div class="guild-info-stat-value">14</div><div class="guild-info-stat-label">Quests</div></div>
+                <div class="guild-info-stat"><div class="guild-info-stat-value">634</div><div class="guild-info-stat-label">REP</div></div>
+            </div>
+        </div>
+    </aside>
+
+    <div class="main-container sidebar-expanded" id="mainContainer">
+        <main class="content">
+            <div class="page-header">
+                <div class="page-title-section">
+                    <h1>🏆 LEADERBOARD</h1>
+                    <p>Top builders by REP earned</p>
+                </div>
+                <div class="time-filters">
+                    <button class="time-btn active">All Time</button>
+                    <button class="time-btn">This Month</button>
+                    <button class="time-btn">This Week</button>
+                </div>
+            </div>
+            
+            <div class="leaderboard-card">
+                <div class="leaderboard-header">
+                    <span>Rank</span>
+                    <span>Builder</span>
+                    <span>Quests</span>
+                    <span>REP</span>
+                </div>
+                <div class="leaderboard-row">
+                    <span class="rank gold">1</span>
+                    <div class="builder-info">
+                        <div class="builder-avatar">E3</div>
+                        <div><div class="builder-name">e394ace6</div><div class="builder-squad">Alpha Squad</div></div>
+                    </div>
+                    <span class="quest-count">23 completed</span>
+                    <span class="rep-score">1,000</span>
+                </div>
+                <div class="leaderboard-row">
+                    <span class="rank silver">2</span>
+                    <div class="builder-info">
+                        <div class="builder-avatar">7D</div>
+                        <div><div class="builder-name">7d3c1e8a</div><div class="builder-squad">Alpha Squad</div></div>
+                    </div>
+                    <span class="quest-count">21 completed</span>
+                    <span class="rep-score">1,000</span>
+                </div>
+                <div class="leaderboard-row">
+                    <span class="rank bronze">3</span>
+                    <div class="builder-info">
+                        <div class="builder-avatar">68</div>
+                        <div><div class="builder-name">6860a9f2</div><div class="builder-squad">Beta Squad</div></div>
+                    </div>
+                    <span class="quest-count">19 completed</span>
+                    <span class="rep-score">987</span>
+                </div>
+                <div class="leaderboard-row">
+                    <span class="rank">4</span>
+                    <div class="builder-info">
+                        <div class="builder-avatar">9A</div>
+                        <div><div class="builder-name">9a2b5c7d</div><div class="builder-squad">Alpha Squad</div></div>
+                    </div>
+                    <span class="quest-count">16 completed</span>
+                    <span class="rep-score">856</span>
+                </div>
+                <div class="leaderboard-row">
+                    <span class="rank">5</span>
+                    <div class="builder-info">
+                        <div class="builder-avatar">3F</div>
+                        <div><div class="builder-name">3f2d1c0b</div><div class="builder-squad">Beta Squad</div></div>
+                    </div>
+                    <span class="quest-count">14 completed</span>
+                    <span class="rep-score">743</span>
+                </div>
+            </div>
+        </main>
+    </div>
+    <script>function toggleSidebar(){const s=document.getElementById('sidebar');const t=document.querySelector('.topbar');const m=document.getElementById('mainContainer');s.classList.toggle('collapsed');t.classList.toggle('sidebar-expanded');m.classList.toggle('sidebar-expanded');}</script>
+</body>
+</html>

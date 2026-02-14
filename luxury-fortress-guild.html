@@ -1,0 +1,1120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fated Fortress | Join the Guild</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Satoshi:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        @import url('https://api.fontshare.com/v2/css?f[]=satoshi@300,400,500,600,700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            /* Inverted Luxury Palette - Light Base */
+            --bg-primary: #F7F5F2;
+            --bg-secondary: #FFFFFF;
+            --bg-tertiary: #EDEAE5;
+            --bg-card: #FFFFFF;
+            
+            /* Adjusted Accent Colors */
+            --accent-primary: #1A1A2E;
+            --accent-secondary: #4A4E69;
+            --accent-highlight: #C9A227;
+            --accent-warm: #8B4513;
+            
+            /* Status Colors */
+            --status-success: #2D5A27;
+            --status-warning: #B8860B;
+            --status-error: #8B0000;
+            --status-info: #1E3A5F;
+            
+            /* Text */
+            --text-primary: #1A1A2E;
+            --text-secondary: #4A4E69;
+            --text-muted: #9A9EB0;
+            
+            /* Borders */
+            --border-light: #E0DCD5;
+            --border-accent: #C9A227;
+        }
+
+        body {
+            font-family: 'Satoshi', 'DM Sans', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            line-height: 1.5;
+        }
+
+        /* Top Navigation */
+        .topbar {
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-light);
+            padding: 16px 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-icon {
+            width: 36px;
+            height: 36px;
+            position: relative;
+        }
+
+        .logo-icon::before {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, var(--accent-highlight), var(--accent-warm));
+            clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+        }
+
+        .logo-text {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 18px;
+            font-weight: 700;
+            letter-spacing: 3px;
+            color: var(--accent-primary);
+        }
+
+        .topbar-right {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 24px;
+        }
+
+        .nav-link {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 11px;
+            font-weight: 500;
+            letter-spacing: 2px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            text-transform: uppercase;
+            transition: color 0.2s;
+        }
+
+        .nav-link:hover {
+            color: var(--accent-highlight);
+        }
+
+        .cta-button {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 2px;
+            padding: 10px 20px;
+            background: linear-gradient(135deg, var(--accent-highlight), var(--accent-warm));
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            text-transform: uppercase;
+            transition: all 0.3s;
+        }
+
+        .cta-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(201, 162, 39, 0.3);
+        }
+
+        .status-badge {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 12px;
+            background: var(--bg-tertiary);
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 1px;
+            color: var(--status-success);
+        }
+
+        .status-dot {
+            width: 6px;
+            height: 6px;
+            background: var(--status-success);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* Main Layout */
+        .main-container {
+            display: grid;
+            grid-template-columns: 260px 1fr;
+            min-height: calc(100vh - 69px);
+        }
+
+        /* Sidebar */
+        .sidebar {
+            background: var(--bg-secondary);
+            border-right: 1px solid var(--border-light);
+            padding: 32px 24px;
+        }
+
+        .sidebar-section {
+            margin-bottom: 32px;
+        }
+
+        .sidebar-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: 2px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            margin-bottom: 16px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            margin: 4px 0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+
+        .nav-item:hover {
+            background: var(--bg-tertiary);
+            color: var(--accent-primary);
+        }
+
+        .nav-item.active {
+            background: linear-gradient(135deg, rgba(201, 162, 39, 0.1), rgba(139, 69, 19, 0.05));
+            color: var(--accent-highlight);
+            border-left: 3px solid var(--accent-highlight);
+        }
+
+        .nav-icon {
+            width: 18px;
+            height: 18px;
+            opacity: 0.7;
+        }
+
+        /* Stats Card */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-light);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        .stat-card:hover {
+            border-color: var(--accent-highlight);
+            box-shadow: 0 4px 20px rgba(201, 162, 39, 0.1);
+        }
+
+        .stat-value {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--accent-primary);
+            letter-spacing: 2px;
+        }
+
+        .stat-label {
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 1.5px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            margin-top: 4px;
+        }
+
+        .stat-trend {
+            font-size: 10px;
+            margin-top: 8px;
+            padding: 2px 8px;
+            border-radius: 4px;
+            display: inline-block;
+        }
+
+        .trend-up {
+            background: rgba(45, 90, 39, 0.1);
+            color: var(--status-success);
+        }
+
+        /* Content Area */
+        .content {
+            padding: 32px;
+            background: var(--bg-primary);
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .section-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 14px;
+            font-weight: 600;
+            letter-spacing: 3px;
+            color: var(--accent-primary);
+            text-transform: uppercase;
+        }
+
+        /* Cards Grid */
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-light);
+            border-radius: 12px;
+            padding: 24px;
+            transition: all 0.3s;
+        }
+
+        .card:hover {
+            border-color: var(--border-accent);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        .card-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 2px;
+            color: var(--accent-primary);
+            text-transform: uppercase;
+        }
+
+        .card-badge {
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: 1px;
+            padding: 4px 10px;
+            border-radius: 4px;
+            background: var(--bg-tertiary);
+            color: var(--text-secondary);
+        }
+
+        /* Guild Message Card */
+        .guild-message {
+            grid-column: 1 / -1;
+            background: linear-gradient(135deg, var(--accent-primary), #2D2D4A);
+            border: none;
+            border-radius: 16px;
+            padding: 40px;
+            text-align: center;
+            color: white;
+            margin-bottom: 32px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .guild-message::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            opacity: 0.5;
+        }
+
+        .guild-message h2 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 32px;
+            font-weight: 800;
+            letter-spacing: 4px;
+            margin-bottom: 16px;
+            position: relative;
+        }
+
+        .guild-message p {
+            font-size: 16px;
+            opacity: 0.9;
+            max-width: 600px;
+            margin: 0 auto 24px;
+            line-height: 1.6;
+            position: relative;
+        }
+
+        .guild-message .cta {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 14px;
+            font-weight: 600;
+            letter-spacing: 3px;
+            padding: 16px 40px;
+            background: linear-gradient(135deg, var(--accent-highlight), var(--accent-warm));
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            text-transform: uppercase;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .guild-message .cta:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 30px rgba(201, 162, 39, 0.4);
+        }
+
+        .guild-stats {
+            display: flex;
+            justify-content: center;
+            gap: 48px;
+            margin-top: 32px;
+            position: relative;
+        }
+
+        .guild-stat {
+            text-align: center;
+        }
+
+        .guild-stat-value {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--accent-highlight);
+        }
+
+        .guild-stat-label {
+            font-size: 11px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            opacity: 0.7;
+            margin-top: 4px;
+        }
+
+        /* Squad Member */
+        .squad-member {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 16px;
+            background: var(--bg-tertiary);
+            border-radius: 8px;
+            margin-bottom: 12px;
+        }
+
+        .member-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent-highlight), var(--accent-warm));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 12px;
+            font-weight: 700;
+            color: white;
+        }
+
+        .member-info {
+            flex: 1;
+        }
+
+        .member-id {
+            font-family: 'Satoshi', sans-serif;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-primary);
+            letter-spacing: 0.5px;
+        }
+
+        .member-status {
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        .member-score {
+            text-align: right;
+        }
+
+        .score-value {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--accent-highlight);
+        }
+
+        .score-label {
+            font-size: 9px;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+
+        /* Progress Bar */
+        .progress-container {
+            margin-top: 16px;
+        }
+
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 11px;
+        }
+
+        .progress-label {
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .progress-value {
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 600;
+            color: var(--accent-primary);
+        }
+
+        .progress-bar {
+            height: 6px;
+            background: var(--bg-tertiary);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            border-radius: 3px;
+            transition: width 0.5s ease;
+        }
+
+        .progress-fill.gold {
+            background: linear-gradient(90deg, var(--accent-highlight), var(--accent-warm));
+        }
+
+        .progress-fill.amber {
+            background: linear-gradient(90deg, #D4A017, #B8860B);
+        }
+
+        .progress-fill.olive {
+            background: linear-gradient(90deg, #556B2F, #2D5A27);
+        }
+
+        /* Activity Log */
+        .activity-list {
+            max-height: 240px;
+            overflow-y: auto;
+        }
+
+        .activity-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        .activity-item:last-child {
+            border-bottom: none;
+        }
+
+        .activity-time {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 10px;
+            color: var(--text-muted);
+            min-width: 50px;
+        }
+
+        .activity-type {
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: 1px;
+            padding: 2px 8px;
+            border-radius: 3px;
+            text-transform: uppercase;
+        }
+
+        .activity-type.contrib {
+            background: rgba(30, 58, 95, 0.1);
+            color: var(--status-info);
+        }
+
+        .activity-type.veri {
+            background: rgba(139, 69, 19, 0.1);
+            color: var(--accent-warm);
+        }
+
+        .activity-type.stake {
+            background: rgba(45, 90, 39, 0.1);
+            color: var(--status-success);
+        }
+
+        .activity-type.guild {
+            background: rgba(201, 162, 39, 0.15);
+            color: var(--accent-highlight);
+        }
+
+        .activity-text {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        /* Ticket Board */
+        .ticket-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 16px;
+            background: var(--bg-tertiary);
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+
+        .ticket-id {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--accent-primary);
+        }
+
+        .ticket-name {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin: 4px 0;
+        }
+
+        .ticket-meta {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        .ticket-bond {
+            font-weight: 600;
+            color: var(--accent-highlight);
+        }
+
+        .ticket-status {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        .ticket-status.open {
+            background: var(--status-success);
+        }
+
+        .ticket-status.closed {
+            background: var(--text-muted);
+        }
+
+        /* Leaderboard */
+        .leaderboard-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            transition: background 0.2s;
+        }
+
+        .leaderboard-item:hover {
+            background: var(--bg-tertiary);
+        }
+
+        .leaderboard-rank {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--accent-highlight);
+            width: 24px;
+        }
+
+        .leaderboard-rank.gold {
+            color: #C9A227;
+        }
+
+        .leaderboard-rank.silver {
+            color: #8E8E93;
+        }
+
+        .leaderboard-rank.bronze {
+            color: #CD7F32;
+        }
+
+        .leaderboard-id {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-primary);
+            flex: 1;
+        }
+
+        .leaderboard-score {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--accent-primary);
+        }
+
+        /* Domain Distribution */
+        .domain-section {
+            margin-top: 32px;
+            padding: 24px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-light);
+            border-radius: 12px;
+        }
+
+        .domain-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 2px;
+            color: var(--accent-primary);
+            text-transform: uppercase;
+            margin-bottom: 20px;
+        }
+
+        .domain-item {
+            margin-bottom: 16px;
+        }
+
+        .domain-item:last-child {
+            margin-bottom: 0;
+        }
+
+        /* Command Bar */
+        .command-bar {
+            background: var(--bg-secondary);
+            border-top: 1px solid var(--border-light);
+            padding: 12px 32px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 12px;
+        }
+
+        .command-prompt {
+            color: var(--accent-highlight);
+            font-weight: 600;
+        }
+
+        .command-input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            outline: none;
+            font-family: inherit;
+            font-size: inherit;
+            color: var(--text-primary);
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-tertiary);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border-light);
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--text-muted);
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.4s ease forwards;
+        }
+
+        .delay-1 { animation-delay: 0.1s; }
+        .delay-2 { animation-delay: 0.2s; }
+        .delay-3 { animation-delay: 0.3s; }
+        .delay-4 { animation-delay: 0.4s; }
+    </style>
+</head>
+<body>
+    <!-- Top Navigation -->
+    <nav class="topbar">
+        <div class="logo-section">
+            <div class="logo-icon"></div>
+            <span class="logo-text">FATED FORTRESS</span>
+        </div>
+        <div class="topbar-right">
+            <div class="nav-links">
+                <a href="#" class="nav-link">Command</a>
+                <a href="#" class="nav-link">The Guild</a>
+                <a href="#" class="nav-link">Squads</a>
+                <a href="#" class="nav-link">Ledger</a>
+            </div>
+            <button class="cta-button">Join the Guild</button>
+        </div>
+    </nav>
+
+    <div class="main-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-section">
+                <div class="sidebar-title">Fortress Status</div>
+                <div class="stat-card" style="padding: 16px; margin-bottom: 12px;">
+                    <div class="stat-value" style="font-size: 24px;">61%</div>
+                    <div class="stat-label">Verify Rate</div>
+                </div>
+                <div class="stat-card" style="padding: 16px;">
+                    <div class="stat-value" style="font-size: 24px;">2,847</div>
+                    <div class="stat-label">Events Logged</div>
+                </div>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="sidebar-title">Quick Actions</div>
+                <div class="nav-item">
+                    <span class="nav-icon">⚔</span>
+                    New Quest
+                </div>
+                <div class="nav-item">
+                    <span class="nav-icon">⊕</span>
+                    Join Squad
+                </div>
+                <div class="nav-item">
+                    <span class="nav-icon">⟳</span>
+                    Refresh Intel
+                </div>
+                <div class="nav-item">
+                    <span class="nav-icon">⚙</span>
+                    Settings
+                </div>
+            </div>
+
+            <div class="sidebar-section" style="margin-top: auto;">
+                <div class="nav-item" style="font-size: 11px; color: var(--text-muted);">
+                    <span class="nav-icon">⏱</span>
+                    Uptime: 14d 6h 32m
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="content">
+            <!-- Guild Message -->
+            <div class="guild-message fade-in">
+                <h2>⚔ JOIN THE GUILD ⚔</h2>
+                <p>Work on a huge project with other passionate builders.<br/>No resumes. No LinkedIn theater. Just execution.</p>
+                <button class="cta">Enter the Fortress</button>
+                
+                <div class="guild-stats">
+                    <div class="guild-stat">
+                        <div class="guild-stat-value">32</div>
+                        <div class="guild-stat-label">Builders</div>
+                    </div>
+                    <div class="guild-stat">
+                        <div class="guild-stat-value">14</div>
+                        <div class="guild-stat-label">Active Quests</div>
+                    </div>
+                    <div class="guild-stat">
+                        <div class="guild-stat-value">634</div>
+                        <div class="guild-stat-label">REP Earned</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stats Grid -->
+            <div class="stats-grid fade-in">
+                <div class="stat-card">
+                    <div class="stat-value">32</div>
+                    <div class="stat-label">Active Builders</div>
+                    <span class="stat-trend trend-up">▲ 4 this week</span>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">14</div>
+                    <div class="stat-label">Open Quests</div>
+                    <span class="stat-trend trend-up">▲ 6 completed</span>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">634</div>
+                    <div class="stat-label">Total REP</div>
+                    <span class="stat-trend trend-up">▲ 128 today</span>
+                </div>
+            </div>
+
+            <!-- Cards Grid -->
+            <div class="cards-grid">
+                <!-- Squad Card -->
+                <div class="card fade-in delay-1">
+                    <div class="card-header">
+                        <span class="card-title">Alpha Squad</span>
+                        <span class="card-badge">DEPLOYMENT READY</span>
+                    </div>
+                    
+                    <div class="squad-member">
+                        <div class="member-avatar">7D</div>
+                        <div class="member-info">
+                            <div class="member-id">7d3c1e8a</div>
+                            <div class="member-status">DEPLOYMENT READY</div>
+                        </div>
+                        <div class="member-score">
+                            <div class="score-value">92.5</div>
+                            <div class="score-label">Power</div>
+                        </div>
+                    </div>
+                    <div class="squad-member">
+                        <div class="member-avatar">E3</div>
+                        <div class="member-info">
+                            <div class="member-id">e394ace6</div>
+                            <div class="member-status">STAKED</div>
+                        </div>
+                        <div class="member-score">
+                            <div class="score-value">87.2</div>
+                            <div class="score-label">Power</div>
+                        </div>
+                    </div>
+                    <div class="squad-member">
+                        <div class="member-avatar">9A</div>
+                        <div class="member-info">
+                            <div class="member-id">9a2b5c7d</div>
+                            <div class="member-status">STAKED</div>
+                        </div>
+                        <div class="member-score">
+                            <div class="score-value">67.3</div>
+                            <div class="score-label">Power</div>
+                        </div>
+                    </div>
+
+                    <div class="progress-container">
+                        <div class="progress-header">
+                            <span class="progress-label">Squad Power</span>
+                            <span class="progress-value">247 / 300</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill gold" style="width: 82%;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Activity Log -->
+                <div class="card fade-in delay-2">
+                    <div class="card-header">
+                        <span class="card-title">Guild Log</span>
+                        <span class="card-badge">LIVE</span>
+                    </div>
+                    
+                    <div class="activity-list">
+                        <div class="activity-item">
+                            <span class="activity-time">14:32</span>
+                            <span class="activity-type guild">GUILD</span>
+                            <span class="activity-text">New builder 7d3c1e joined the guild!</span>
+                        </div>
+                        <div class="activity-item">
+                            <span class="activity-time">14:31</span>
+                            <span class="activity-type veri">QUEST</span>
+                            <span class="activity-text">Quest #8822 verified by e394ac</span>
+                        </div>
+                        <div class="activity-item">
+                            <span class="activity-time">14:30</span>
+                            <span class="activity-type stake">STAK</span>
+                            <span class="activity-text">Stake placed: 30 REP on Dark Mode</span>
+                        </div>
+                        <div class="activity-item">
+                            <span class="activity-time">14:29</span>
+                            <span class="activity-type contrib">BUILD</span>
+                            <span class="activity-text">9a2b5c pushed code to API Integration</span>
+                        </div>
+                        <div class="activity-item">
+                            <span class="activity-time">14:28</span>
+                            <span class="activity-type veri">QUEST</span>
+                            <span class="activity-text">Quest #8820 verified - Sim Ticket 2</span>
+                        </div>
+                        <div class="activity-item">
+                            <span class="activity-time">14:27</span>
+                            <span class="activity-type guild">SQUAD</span>
+                            <span class="activity-text">Alpha Squad formed! Power: 247</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bottom Row -->
+            <div class="cards-grid">
+                <!-- Quest Board -->
+                <div class="card fade-in delay-3">
+                    <div class="card-header">
+                        <span class="card-title">Quest Board</span>
+                        <span class="card-badge">14 AVAILABLE</span>
+                    </div>
+                    
+                    <div class="ticket-item">
+                        <div>
+                            <div class="ticket-id">#8821</div>
+                            <div class="ticket-name">Sim Ticket 2</div>
+                            <div class="ticket-meta">
+                                <span class="ticket-bond">REWARD: 30 REP</span>
+                            </div>
+                        </div>
+                        <span class="ticket-status open"></span>
+                    </div>
+                    <div class="ticket-item">
+                        <div>
+                            <div class="ticket-id">#8822</div>
+                            <div class="ticket-name">Dark Mode Implementation</div>
+                            <div class="ticket-meta">
+                                <span class="ticket-bond">REWARD: 30 REP</span>
+                            </div>
+                        </div>
+                        <span class="ticket-status open"></span>
+                    </div>
+                    <div class="ticket-item">
+                        <div>
+                            <div class="ticket-id">#8823</div>
+                            <div class="ticket-name">API Integration</div>
+                            <div class="ticket-meta">
+                                <span class="ticket-bond">REWARD: 25 REP</span>
+                            </div>
+                        </div>
+                        <span class="ticket-status open"></span>
+                    </div>
+                </div>
+
+                <!-- Leaderboard -->
+                <div class="card fade-in delay-4">
+                    <div class="card-header">
+                        <span class="card-title">Top Builders</span>
+                        <span class="card-badge">WEEKLY</span>
+                    </div>
+                    
+                    <div class="leaderboard-item">
+                        <span class="leaderboard-rank gold">1</span>
+                        <span class="leaderboard-id">e394ace6</span>
+                        <span class="leaderboard-score">1,000 REP</span>
+                    </div>
+                    <div class="leaderboard-item">
+                        <span class="leaderboard-rank silver">2</span>
+                        <span class="leaderboard-id">7d3c1e8a</span>
+                        <span class="leaderboard-score">1,000 REP</span>
+                    </div>
+                    <div class="leaderboard-item">
+                        <span class="leaderboard-rank bronze">3</span>
+                        <span class="leaderboard-id">6860a9f2</span>
+                        <span class="leaderboard-score">987 REP</span>
+                    </div>
+                    <div class="leaderboard-item">
+                        <span class="leaderboard-rank">4</span>
+                        <span class="leaderboard-id">3f2d1c0b</span>
+                        <span class="leaderboard-score">856 REP</span>
+                    </div>
+                    <div class="leaderboard-item">
+                        <span class="leaderboard-rank">5</span>
+                        <span class="leaderboard-id">a1b2c3d4</span>
+                        <span class="leaderboard-score">743 REP</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Domain Distribution -->
+            <div class="domain-section fade-in">
+                <div class="domain-title">Quest Categories</div>
+                
+                <div class="domain-item">
+                    <div class="progress-header">
+                        <span class="progress-label">Backend</span>
+                        <span class="progress-value">48%</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill gold" style="width: 48%;"></div>
+                    </div>
+                </div>
+                
+                <div class="domain-item">
+                    <div class="progress-header">
+                        <span class="progress-label">Frontend</span>
+                        <span class="progress-value">28%</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill amber" style="width: 28%;"></div>
+                    </div>
+                </div>
+                
+                <div class="domain-item">
+                    <div class="progress-header">
+                        <span class="progress-label">DevOps</span>
+                        <span class="progress-value">24%</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill olive" style="width: 24%;"></div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Command Bar -->
+    <div class="command-bar">
+        <span class="command-prompt">⚔</span>
+        <input type="text" class="command-input" placeholder="Enter the fortress..." />
+    </div>
+</body>
+</html>

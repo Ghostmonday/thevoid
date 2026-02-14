@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>THE_VOID - Command Terminal</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap');
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    :root {
+      --void: #09090b;
+      --void-lighter: #18181b;
+      --void-lightest: #27272a;
+      --terminal-green: #10b981;
+      --terminal-green-dim: #065f46;
+      --signal-amber: #f59e0b;
+      --signal-amber-dim: #92400e;
+      --cyan: #06b6d4;
+      --purple: #a855f7;
+      --white-10: rgba(255,255,255,0.1);
+      --white-5: rgba(255,255,255,0.05);
+      --white-20: rgba(255,255,255,0.2);
+    }
+    
+    body {
+      font-family: 'JetBrains Mono', monospace;
+      background: var(--void);
+      color: #a1a1aa;
+      min-height: 100vh;
+      overflow-x: hidden;
+      font-size: 13px;
+    }
+    
+    /* Grid background pattern */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: 
+        linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none;
+    }
+    
+    /* Vignette */
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.6) 100%);
+      pointer-events: none;
+      z-index: 100;
+    }
+    
+    .app {
+      display: grid;
+      grid-template-columns: 260px 1fr;
+      min-height: 100vh;
+      position: relative;
+      z-index: 1;
+    }
+    
+    /* SIDEBAR */
+    .sidebar {
+      background: rgba(9, 9, 11, 0.8);
+      backdrop-filter: blur(20px);
+      border-right: 1px solid var(--white-10);
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 32px;
+    }
+    
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: var(--terminal-green);
+    }
+    
+    .logo-dot {
+      width: 12px;
+      height: 12px;
+      background: var(--terminal-green);
+      box-shadow: 0 0 15px var(--terminal-green);
+      border-radius: 2px;
+    }
+    
+    .logo-text {
+      font-weight: 700;
+      font-size: 16px;
+      letter-spacing: 3px;
+      color: white;
+    }
+    
+    .nav {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 12px 16px;
+      border: none;
+      background: transparent;
+      color: #71717a;
+      font-family: inherit;
+      font-size: 12px;
+      letter-spacing: 1px;
+      cursor: pointer;
+      border-left: 2px solid transparent;
+      transition: all 0.2s;
+      text-align: left;
+      width: 100%;
+    }
+    
+    .nav-item:hover {
+      background: var(--white-5);
+      color: white;
+      border-left-color: var(--white-20);
+    }
+    
+    .nav-item.active {
+      background: rgba(16, 185, 129, 0.1);
+      color: var(--terminal-green);
+      border-left-color: var(--terminal-green);
+    }
+    
+    .nav-icon {
+      opacity: 0.7;
+      font-size: 14px;
+    }
+    
+    .nav-item:hover .nav-icon,
+    .nav-item.active .nav-icon {
+      opacity: 1;
+    }
+    
+    .sidebar-footer {
+      margin-top: auto;
+      border-top: 1px solid var(--white-10);
+      padding-top: 24px;
+    }
+    
+    .system-status-label {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: #52525b;
+      margin-bottom: 8px;
+    }
+    
+    .system-status {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 11px;
+      color: #34d399;
+    }
+    
+    .status-pulse {
+      position: relative;
+      width: 8px;
+      height: 8px;
+    }
+    
+    .status-pulse::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: var(--terminal-green);
+      border-radius: 50%;
+    }
+    
+    .status-pulse::after {
+      content: '';
+      position: absolute;
+      inset: -4px;
+      background: var(--terminal-green);
+      border-radius: 50%;
+      animation: ping 1.5s cubic-bezier(0, 0, 0.2, 1) infinite;
+      opacity: 0.75;
+    }
+    
+    @keyframes ping {
+      75%, 100% { transform: scale(2); opacity: 0; }
+    }
+    
+    /* MAIN CONTENT */
+    .main {
+      padding: 32px;
+      overflow-y: auto;
+    }
+    
+    .page-header {
+      margin-bottom: 32px;
+    }
+    
+    .page-title {
+      font-size: 24px;
+      font-weight: 700;
+      color: white;
+      letter-spacing: 1px;
+    }
+    
+    .page-subtitle {
+      font-size: 11px;
+      color: #52525b;
+      margin-top: 4px;
+      letter-spacing: 1px;
+    }
+    
+    /* CARDS GRID */
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+      gap: 24px;
+      margin-bottom: 32px;
+    }
+    
+    /* SQUAD CARD */
+    .squad-card {
+      background: rgba(39, 39, 42, 0.4);
+      border: 1px solid var(--white-10);
+      max-width: 480px;
+    }
+    
+    .squad-card-header {
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--white-5);
+      background: linear-gradient(90deg, var(--white-5), transparent);
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+    
+    .squad-name {
+      font-size: 18px;
+      font-weight: 700;
+      color: white;
+      letter-spacing: 1px;
+    }
+    
+    .squad-meta {
+      font-size: 10px;
+      color: var(--terminal-green);
+      margin-top: 4px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .squad-meta span {
+      color: #52525b;
+    }
+    
+    .squad-power {
+      text-align: right;
+    }
+    
+    .squad-power-label {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: #52525b;
+    }
+    
+    .squad-power-value {
+      font-size: 32px;
+      font-weight: 700;
+      color: white;
+      letter-spacing: -1px;
+    }
+    
+    .squad-power-value span {
+      font-size: 12px;
+      font-weight: 400;
+      color: #52525b;
+    }
+    
+    /* SQUAD MEMBERS */
+    .squad-members {
+      border-bottom: 1px solid var(--white-5);
+    }
+    
+    .member {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 24px;
+      border-bottom: 1px solid var(--white-5);
+      transition: background 0.2s;
+    }
+    
+    .member:last-child {
+      border-bottom: none;
+    }
+    
+    .member:hover {
+      background: var(--white-5);
+    }
+    
+    .member-info {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    
+    .role-badge {
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      border: 1px solid;
+      border-radius: 2px;
+    }
+    
+    .role-badge.guardian {
+      border-color: rgba(245, 158, 11, 0.3);
+      color: var(--signal-amber);
+      background: rgba(245, 158, 11, 0.1);
+    }
+    
+    .role-badge.architect {
+      border-color: rgba(168, 85, 247, 0.3);
+      color: var(--purple);
+      background: rgba(168, 85, 247, 0.1);
+    }
+    
+    .role-badge.striker {
+      border-color: rgba(6, 182, 212, 0.3);
+      color: var(--cyan);
+      background: rgba(6, 182, 212, 0.1);
+    }
+    
+    .member-details {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    
+    .member-id {
+      font-size: 13px;
+      color: #d4d4d8;
+      font-weight: 500;
+    }
+    
+    .member-role {
+      font-size: 9px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: #52525b;
+    }
+    
+    .member-score {
+      text-align: right;
+    }
+    
+    .member-score-value {
+      font-size: 14px;
+      font-weight: 700;
+      color: #a1a1aa;
+      font-variant-numeric: tabular-nums;
+    }
+    
+    .member-score-bar {
+      width: 64px;
+      height: 4px;
+      background: #3f3f46;
+      border-radius: 2px;
+      margin-top: 4px;
+      overflow: hidden;
+    }
+    
+    .member-score-fill {
+      height: 100%;
+      background: rgba(16, 185, 129, 0.7);
+      border-radius: 2px;
+    }
+    
+    .squad-card-footer {
+      padding: 16px 24px;
+      background: rgba(9, 9, 11, 0.3);
+      border-top: 1px solid var(--white-5);
+    }
+    
+    .reroll-btn {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      background: transparent;
+      color: var(--terminal-green);
+      font-family: inherit;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.2s;
+    }
+    
+    .reroll-btn:hover {
+      background: rgba(16, 185, 129, 0.1);
+    }
+    
+    /* EVENT LOG */
+    .event-log {
+      border: 1px solid var(--white-10);
+      background: black;
+      height: 400px;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .log-header {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--white-10);
+      background: rgba(39, 39, 42, 0.5);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .log-title {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: #52525b;
+    }
+    
+    .log-indicator {
+      width: 8px;
+      height: 8px;
+      background: var(--terminal-green);
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+    
+    .log-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    
+    .log-entry {
+      display: flex;
+      gap: 12px;
+      opacity: 0.8;
+    }
+    
+    .log-entry:hover {
+      opacity: 1;
+    }
+    
+    .log-time {
+      color: #52525b;
+      font-size: 11px;
+      min-width: 70px;
+    }
+    
+    .log-type {
+      font-weight: 700;
+      font-size: 11px;
+      min-width: 180px;
+    }
+    
+    .log-type.contribution {
+      color: var(--cyan);
+    }
+    
+    .log-type.verification {
+      color: var(--purple);
+    }
+    
+    .log-type.stake {
+      color: var(--signal-amber);
+    }
+    
+    .log-actor {
+      color: #71717a;
+    }
+    
+    .log-payload {
+      color: #3f3f46;
+      font-size: 10px;
+      padding-left: 12px;
+      border-left: 1px solid #27272a;
+      margin-top: 4px;
+    }
+    
+    .log-cursor {
+      color: var(--terminal-green);
+      animation: blink 1s step-end infinite;
+    }
+    
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0; }
+    }
+    
+    /* STATS ROW */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+    
+    .stat-card {
+      background: rgba(39, 39, 42, 0.4);
+      border: 1px solid var(--white-10);
+      padding: 20px;
+    }
+    
+    .stat-label {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: #52525b;
+      margin-bottom: 8px;
+    }
+    
+    .stat-value {
+      font-size: 28px;
+      font-weight: 700;
+      color: white;
+    }
+    
+    .stat-value.green {
+      color: var(--terminal-green);
+    }
+    
+    .stat-value.amber {
+      color: var(--signal-amber);
+    }
+    
+    .stat-value.cyan {
+      color: var(--cyan);
+    }
+    
+    /* TWO COLUMN LAYOUT */
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="logo">
+        <div class="logo-dot"></div>
+        <span class="logo-text">THE_VOID</span>
+      </div>
+      
+      <nav class="nav">
+        <button class="nav-item active">
+          <span class="nav-icon">⚡</span>
+          <span>COMMAND</span>
+        </button>
+        <button class="nav-item">
+          <span class="nav-icon">👥</span>
+          <span>SQUADS</span>
+        </button>
+        <button class="nav-item">
+          <span class="nav-icon">📜</span>
+          <span>LEDGER</span>
+        </button>
+        <button class="nav-item">
+          <span class="nav-icon">💀</span>
+          <span>CEMETERY</span>
+        </button>
+      </nav>
+      
+      <div class="sidebar-footer">
+        <div class="system-status-label">System Status</div>
+        <div class="system-status">
+          <div class="status-pulse"></div>
+          <span>ONLINE :: v.0.4.2</span>
+        </div>
+      </div>
+    </aside>
+    
+    <!-- MAIN CONTENT -->
+    <main class="main">
+      <div class="page-header">
+        <h1 class="page-title">COMMAND_DECK</h1>
+        <p class="page-subtitle">Fortress Operations Center // Active Deployment</p>
+      </div>
+      
+      <!-- STATS -->
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-label">Total Actors</div>
+          <div class="stat-value">32</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Active Tickets</div>
+          <div class="stat-value green">14</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">REP Staked</div>
+          <div class="stat-value amber">634</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Completion Rate</div>
+          <div class="stat-value cyan">61%</div>
+        </div>
+      </div>
+      
+      <!-- SQUAD + LOG -->
+      <div class="two-col">
+        <!-- SQUAD CARD -->
+        <div class="squad-card">
+          <div class="squad-card-header">
+            <div>
+              <div class="squad-name">ALPHA_SQUAD</div>
+              <div class="squad-meta">
+                DEPLOYMENT_READY <span>//</span> ID: #8821
+              </div>
+            </div>
+            <div class="squad-power">
+              <div class="squad-power-label">Total Power</div>
+              <div class="squad-power-value">247 <span>PWR</span></div>
+            </div>
+          </div>
+          
+          <div class="squad-members">
+            <div class="member">
+              <div class="member-info">
+                <div class="role-badge guardian">🛡️</div>
+                <div class="member-details">
+                  <div class="member-id">e394ace6...</div>
+                  <div class="member-role">Guardian</div>
+                </div>
+              </div>
+              <div class="member-score">
+                <div class="member-score-value">87.2</div>
+                <div class="member-score-bar">
+                  <div class="member-score-fill" style="width: 87%"></div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="member">
+              <div class="member-info">
+                <div class="role-badge architect">🏗️</div>
+                <div class="member-details">
+                  <div class="member-id">7d3c1e8a...</div>
+                  <div class="member-role">Architect</div>
+                </div>
+              </div>
+              <div class="member-score">
+                <div class="member-score-value">92.5</div>
+                <div class="member-score-bar">
+                  <div class="member-score-fill" style="width: 92%"></div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="member">
+              <div class="member-info">
+                <div class="role-badge striker">⚔️</div>
+                <div class="member-details">
+                  <div class="member-id">9a2b5c7d...</div>
+                  <div class="member-role">Striker</div>
+                </div>
+              </div>
+              <div class="member-score">
+                <div class="member-score-value">67.3</div>
+                <div class="member-score-bar">
+                  <div class="member-score-fill" style="width: 67%"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="squad-card-footer">
+            <button class="reroll-btn">
+              <span>⟳</span> Re-Roll Parameters
+            </button>
+          </div>
+        </div>
+        
+        <!-- EVENT LOG -->
+        <div class="event-log">
+          <div class="log-header">
+            <span class="log-title">System_Events.log</span>
+            <div class="log-indicator"></div>
+          </div>
+          
+          <div class="log-content">
+            <div class="log-entry">
+              <span class="log-time">14:32:07</span>
+              <div>
+                <span class="log-type contribution">[CONTRIBUTION_SUBMITTED]</span>
+                <span class="log-actor"> e394ace6</span>
+                <div class="log-payload">{"xp": 50, "domain": "BACKEND"}...</div>
+              </div>
+            </div>
+            
+            <div class="log-entry">
+              <span class="log-time">14:31:42</span>
+              <div>
+                <span class="log-type verification">[VERIFICATION_SUBMITTED]</span>
+                <span class="log-actor"> 7d3c1e8a</span>
+                <div class="log-payload">{"ticketId": "abc-123", "approved": true}...</div>
+              </div>
+            </div>
+            
+            <div class="log-entry">
+              <span class="log-time">14:30:18</span>
+              <div>
+                <span class="log-type stake">[STAKE_DEPOSITED]</span>
+                <span class="log-actor"> 9a2b5c7d</span>
+                <div class="log-payload">{"amount": 50, "bondId": "bond-xyz"}...</div>
+              </div>
+            </div>
+            
+            <div class="log-entry">
+              <span class="log-time">14:29:55</span>
+              <div>
+                <span class="log-type contribution">[CONTRIBUTION_SUBMITTED]</span>
+                <span class="log-actor"> e05e2a7c</span>
+                <div class="log-payload">{"xp": 25, "domain": "FRONTEND"}...</div>
+              </div>
+            </div>
+            
+            <div class="log-entry">
+              <span class="log-time">14:28:33</span>
+              <div>
+                <span class="log-type verification">[TICKET_COMPLETED]</span>
+                <span class="log-actor"> 6860abcf</span>
+                <div class="log-payload">{"ticketId": "wp-test-1"}...</div>
+              </div>
+            </div>
+            
+            <div class="log-entry">
+              <span class="log-time">14:27:10</span>
+              <div>
+                <span class="log-type stake">[STAKE_CLAIMED]</span>
+                <span class="log-actor"> 7d3c1e8a</span>
+                <div class="log-payload">{"amount": 75, "bondId": "bond-abc"}...</div>
+              </div>
+            </div>
+            
+            <div><span class="log-cursor">_</span></div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</body>
+</html>

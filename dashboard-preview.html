@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fated Fortress - Command Terminal</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap');
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    :root {
+      --bg: #0a0a0a;
+      --green: #00ff41;
+      --green-dim: #008F11;
+      --green-faint: #003b00;
+      --amber: #ffb000;
+      --red: #ff3333;
+      --cyan: #00d4ff;
+    }
+    
+    body {
+      font-family: 'JetBrains Mono', monospace;
+      background: var(--bg);
+      color: var(--green);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+    
+    /* Scanlines */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(0, 255, 65, 0.03) 2px,
+        rgba(0, 255, 65, 0.03) 4px
+      );
+      pointer-events: none;
+      z-index: 1000;
+    }
+    
+    /* Glow */
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(ellipse at center, transparent 0%, rgba(0,0,0,0.4) 100%);
+      pointer-events: none;
+    }
+    
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 20px;
+      position: relative;
+      z-index: 1;
+    }
+    
+    /* Header */
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px 20px;
+      border: 1px solid var(--green-dim);
+      margin-bottom: 20px;
+      background: rgba(0, 59, 0, 0.3);
+    }
+    
+    .logo {
+      font-size: 24px;
+      font-weight: 700;
+      text-shadow: 0 0 10px var(--green);
+      letter-spacing: 2px;
+    }
+    
+    .logo span {
+      color: var(--cyan);
+    }
+    
+    .status {
+      display: flex;
+      gap: 20px;
+      font-size: 12px;
+    }
+    
+    .status-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--green);
+      box-shadow: 0 0 8px var(--green);
+      animation: pulse 2s infinite;
+    }
+    
+    .status-dot.offline {
+      background: var(--red);
+      box-shadow: 0 0 8px var(--red);
+    }
+    
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+    
+    /* Grid */
+    .grid {
+      display: grid;
+      grid-template-columns: 280px 1fr 320px;
+      gap: 20px;
+    }
+    
+    /* Panels */
+    .panel {
+      border: 1px solid var(--green-dim);
+      background: rgba(0, 20, 0, 0.5);
+      padding: 15px;
+    }
+    
+    .panel-header {
+      font-size: 11px;
+      color: var(--green-dim);
+      margin-bottom: 15px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--green-faint);
+      letter-spacing: 1px;
+    }
+    
+    .panel-header::before {
+      content: '── ';
+    }
+    
+    .panel-header::after {
+      content: ' ──';
+    }
+    
+    /* Stats */
+    .stat-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 12px;
+      font-size: 13px;
+    }
+    
+    .stat-label {
+      color: var(--green-dim);
+    }
+    
+    .stat-value {
+      font-weight: 700;
+    }
+    
+    .stat-value.cyan { color: var(--cyan); }
+    .stat-value.amber { color: var(--amber); }
+    .stat-value.red { color: var(--red); }
+    
+    /* Progress bars */
+    .progress-bar {
+      margin: 8px 0;
+      font-size: 12px;
+    }
+    
+    .progress-label {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 4px;
+      font-size: 11px;
+    }
+    
+    .progress-track {
+      background: var(--green-faint);
+      height: 16px;
+      position: relative;
+    }
+    
+    .progress-fill {
+      height: 100%;
+      background: var(--green);
+      box-shadow: 0 0 10px var(--green);
+      transition: width 0.5s;
+    }
+    
+    .progress-fill.amber { background: var(--amber); box-shadow: 0 0 10px var(--amber); }
+    .progress-fill.cyan { background: var(--cyan); box-shadow: 0 0 10px var(--cyan); }
+    .progress-fill.red { background: var(--red); box-shadow: 0 0 10px var(--red); }
+    
+    /* Table */
+    .table {
+      width: 100%;
+      font-size: 11px;
+      border-collapse: collapse;
+    }
+    
+    .table th {
+      text-align: left;
+      color: var(--green-dim);
+      padding: 8px 4px;
+      border-bottom: 1px solid var(--green-faint);
+      font-weight: normal;
+    }
+    
+    .table td {
+      padding: 8px 4px;
+      border-bottom: 1px solid var(--green-faint);
+    }
+    
+    .table tr:hover {
+      background: rgba(0, 255, 65, 0.05);
+    }
+    
+    .rank {
+      color: var(--amber);
+      font-weight: bold;
+    }
+    
+    .rank.gold { color: #ffd700; }
+    .rank.silver { color: #c0c0c0; }
+    .rank.bronze { color: #cd7f32; }
+    
+    /* Activity */
+    .activity-item {
+      display: flex;
+      gap: 10px;
+      padding: 8px 0;
+      font-size: 11px;
+      border-bottom: 1px solid var(--green-faint);
+    }
+    
+    .activity-icon {
+      width: 16px;
+      text-align: center;
+    }
+    
+    .activity-icon.success { color: var(--green); }
+    .activity-icon.warning { color: var(--amber); }
+    .activity-icon.error { color: var(--red); }
+    
+    .activity-time {
+      color: var(--green-dim);
+      font-size: 10px;
+    }
+    
+    /* Command bar */
+    .command-bar {
+      margin-top: 20px;
+      padding: 15px 20px;
+      border: 1px solid var(--green-dim);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(0, 20, 0, 0.5);
+    }
+    
+    .prompt {
+      color: var(--cyan);
+    }
+    
+    .cursor {
+      display: inline-block;
+      width: 8px;
+      height: 16px;
+      background: var(--green);
+      animation: blink 1s step-end infinite;
+    }
+    
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0; }
+    }
+    
+    /* Ticket cards */
+    .ticket-grid {
+      display: grid;
+      gap: 10px;
+    }
+    
+    .ticket-card {
+      border: 1px solid var(--green-faint);
+      padding: 12px;
+      font-size: 11px;
+    }
+    
+    .ticket-card.claimed {
+      border-color: var(--cyan);
+    }
+    
+    .ticket-title {
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+    
+    .ticket-meta {
+      display: flex;
+      justify-content: space-between;
+      color: var(--green-dim);
+      font-size: 10px;
+    }
+    
+    .badge {
+      display: inline-block;
+      padding: 2px 6px;
+      font-size: 9px;
+      border: 1px solid;
+    }
+    
+    .badge.open { color: var(--green); border-color: var(--green); }
+    .badge.claimed { color: var(--cyan); border-color: var(--cyan); }
+    .badge.completed { color: var(--green-dim); border-color: var(--green-dim); }
+    .badge.forfeited { color: var(--red); border-color: var(--red); }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="logo">
+        ⛦ <span>FATED</span> FORTRESS
+      </div>
+      <div class="status">
+        <div class="status-item">
+          <span class="status-dot"></span>
+          <span>SYSTEM ONLINE</span>
+        </div>
+        <div class="status-item">
+          <span>NODE: localhost:3000</span>
+        </div>
+        <div class="status-item">
+          <span id="clock">14:32:07</span>
+        </div>
+      </div>
+    </header>
+    
+    <div class="grid">
+      <!-- LEFT: System Stats -->
+      <div class="panel">
+        <div class="panel-header">SYSTEM STATS</div>
+        
+        <div class="stat-row">
+          <span class="stat-label">TOTAL ACTORS</span>
+          <span class="stat-value cyan">32</span>
+        </div>
+        <div class="stat-row">
+          <span class="stat-label">TOTAL TICKETS</span>
+          <span class="stat-value">41</span>
+        </div>
+        <div class="stat-row">
+          <span class="stat-label">REP STAKED</span>
+          <span class="stat-value amber">634</span>
+        </div>
+        
+        <div class="panel-header" style="margin-top: 20px;">TICKET STATUS</div>
+        
+        <div class="progress-bar">
+          <div class="progress-label">
+            <span>OPEN</span>
+            <span>14</span>
+          </div>
+          <div class="progress-track">
+            <div class="progress-fill" style="width: 34%"></div>
+          </div>
+        </div>
+        
+        <div class="progress-bar">
+          <div class="progress-label">
+            <span>CLAIMED</span>
+            <span>1</span>
+          </div>
+          <div class="progress-track">
+            <div class="progress-fill cyan" style="width: 2%"></div>
+          </div>
+        </div>
+        
+        <div class="progress-bar">
+          <div class="progress-label">
+            <span>COMPLETED</span>
+            <span>25</span>
+          </div>
+          <div class="progress-track">
+            <div class="progress-fill" style="width: 61%"></div>
+          </div>
+        </div>
+        
+        <div class="progress-bar">
+          <div class="progress-label">
+            <span>FORFEITED</span>
+            <span>1</span>
+          </div>
+          <div class="progress-track">
+            <div class="progress-fill red" style="width: 2%"></div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- CENTER: Tickets -->
+      <div class="panel">
+        <div class="panel-header">TICKET BOARD</div>
+        
+        <div class="ticket-grid">
+          <div class="ticket-card">
+            <div class="ticket-title">Sim Ticket 2</div>
+            <div class="ticket-meta">
+              <span>BOND: 30 REP</span>
+              <span class="badge open">OPEN</span>
+            </div>
+          </div>
+          
+          <div class="ticket-card">
+            <div class="ticket-title">Add dark mode feature</div>
+            <div class="ticket-meta">
+              <span>BOND: 30 REP</span>
+              <span class="badge open">OPEN</span>
+            </div>
+          </div>
+          
+          <div class="ticket-card">
+            <div class="ticket-title">High Bond Ticket</div>
+            <div class="ticket-meta">
+              <span>BOND: 50 REP</span>
+              <span class="badge open">OPEN</span>
+            </div>
+          </div>
+          
+          <div class="ticket-card claimed">
+            <div class="ticket-title">Open Ticket 1</div>
+            <div class="ticket-meta">
+              <span>BOND: 10 REP</span>
+              <span class="badge claimed">CLAIMED</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- RIGHT: Leaderboard + Activity -->
+      <div>
+        <div class="panel" style="margin-bottom: 20px;">
+          <div class="panel-header">REP LEADERS</div>
+          
+          <table class="table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>ACTOR</th>
+                <th>REP</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="rank gold">1</td>
+                <td>e394ace6...</td>
+                <td class="stat-value">1000</td>
+              </tr>
+              <tr>
+                <td class="rank silver">2</td>
+                <td>e05e2a7c...</td>
+                <td class="stat-value">1000</td>
+              </tr>
+              <tr>
+                <td class="rank bronze">3</td>
+                <td>6860abcf...</td>
+                <td class="stat-value">1000</td>
+              </tr>
+              <tr>
+                <td>4</td>
+                <td>7d3c1e8a...</td>
+                <td>995</td>
+              </tr>
+              <tr>
+                <td>5</td>
+                <td>9a2b5c7d...</td>
+                <td>980</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        
+        <div class="panel">
+          <div class="panel-header">RECENT ACTIVITY</div>
+          
+          <div class="activity-item">
+            <span class="activity-icon success">✓</span>
+            <span>Ticket completed</span>
+            <span class="activity-time">2m ago</span>
+          </div>
+          <div class="activity-item">
+            <span class="activity-icon success">✓</span>
+            <span>Staked 50 REP</span>
+            <span class="activity-time">5m ago</span>
+          </div>
+          <div class="activity-item">
+            <span class="activity-icon warning">⚠</span>
+            <span>Ticket forfeited</span>
+            <span class="activity-time">12m ago</span>
+          </div>
+          <div class="activity-item">
+            <span class="activity-icon success">✓</span>
+            <span>Verification submitted</span>
+            <span class="activity-time">18m ago</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="command-bar">
+      <span class="prompt">user@fortress:~$</span>
+      <span style="color: var(--green-dim);">_</span>
+      <span class="cursor"></span>
+    </div>
+  </div>
+  
+  <script>
+    // Clock
+    setInterval(() => {
+      const now = new Date();
+      document.getElementById('clock').textContent = now.toLocaleTimeString('en-US', { hour12: false });
+    }, 1000);
+  </script>
+</body>
+</html>

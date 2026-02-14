@@ -1,0 +1,28 @@
+FATED FORTRESS — TECHNICAL SPECIFICATION (NON-COMPLETE EDITION)
+
+Core Principles 1. Telemetry is append-only. 2. Identity is internally
+verified. 3. External presentation may be anonymous. 4. AI proposes;
+humans choose. 5. XP cannot be purchased.
+
+Telemetry Architecture - Event logging per task lifecycle. - Immutable
+contribution ledger. - Peer verification loop. - Weighted trust gradient
+(execution, collaboration, contribution, judgment).
+
+XP Model - Multi-axis scoring. - Time-weighted decay. - Skill-specific
+decay rates. - Verification-weight multipliers.
+
+Identity Layer - Verified real-world identity at registration. -
+Optional public pseudonymity. - Smurf protection via backend linkage.
+
+AI Layer - Suggests project formation. - Matches team archetypes
+probabilistically. - Cannot override user consent. - Cannot directly
+assign XP without verification consensus.
+
+Governance - Audit trails immutable. - Appeals process defined. - Abuse
+detection via anomaly analysis. - No pay-for-visibility mechanics.
+
+Limitations - Does not measure wisdom. - Cannot guarantee personality
+compatibility. - Matching remains probabilistic. - Telemetry captures
+output, not intent.
+
+This document defines structure. It does not claim transcendence.

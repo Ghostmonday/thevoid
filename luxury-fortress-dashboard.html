@@ -1,0 +1,1221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FORTRESS · Command Center</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600&family=DM+Sans:wght@300;400;500;600&display=swap');
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    :root {
+      --obsidian: #0a0a0b;
+      --onyx: #111113;
+      --graphite: #1a1a1d;
+      --slate: #252529;
+      --pewter: #3a3a42;
+      --silver: #8a8a95;
+      --champagne: #c9c4b8;
+      --ivory: #f5f3ef;
+      --gold: #b8956e;
+      --gold-dim: #8a7254;
+      --gold-glow: rgba(184, 149, 110, 0.15);
+      --bronze: #9e7b5c;
+      --copper: #b87333;
+      --white-3: rgba(255,255,255,0.03);
+      --white-5: rgba(255,255,255,0.05);
+      --white-8: rgba(255,255,255,0.08);
+      --white-12: rgba(255,255,255,0.12);
+      --white-20: rgba(255,255,255,0.2);
+    }
+    
+    html {
+      background: var(--obsidian);
+    }
+    
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--obsidian);
+      color: var(--silver);
+      min-height: 100vh;
+      font-size: 13px;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+    
+    /* Subtle texture */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: 
+        radial-gradient(ellipse at 20% 20%, rgba(184, 149, 110, 0.03) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 80%, rgba(158, 123, 92, 0.03) 0%, transparent 50%);
+      pointer-events: none;
+      z-index: 0;
+    }
+    
+    /* APP LAYOUT */
+    .app {
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      min-height: 100vh;
+      position: relative;
+      z-index: 1;
+    }
+    
+    /* ═══════════════════════════════════════════════════════════════
+       SIDEBAR - REFINED & LUXURY
+    ═══════════════════════════════════════════════════════════════ */
+    .sidebar {
+      background: linear-gradient(180deg, var(--onyx) 0%, var(--obsidian) 100%);
+      border-right: 1px solid var(--white-5);
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .sidebar-top {
+      padding: 40px 32px;
+      border-bottom: 1px solid var(--white-5);
+    }
+    
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    
+    .logo-mark {
+      width: 36px;
+      height: 36px;
+      border: 1px solid var(--gold);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+    
+    .logo-mark::before {
+      content: '◈';
+      color: var(--gold);
+      font-size: 18px;
+    }
+    
+    .logo-mark::after {
+      content: '';
+      position: absolute;
+      inset: -6px;
+      border: 1px solid var(--gold-dim);
+      opacity: 0.3;
+    }
+    
+    .logo-text {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 300;
+      font-size: 22px;
+      color: var(--ivory);
+      letter-spacing: 6px;
+    }
+    
+    .logo-subtitle {
+      font-size: 9px;
+      letter-spacing: 3px;
+      color: var(--gold);
+      text-transform: uppercase;
+      margin-top: 2px;
+    }
+    
+    /* NAVIGATION - Minimal */
+    .nav {
+      flex: 1;
+      padding: 32px 0;
+    }
+    
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 14px 32px;
+      border: none;
+      background: transparent;
+      color: var(--silver);
+      font-family: inherit;
+      font-size: 12px;
+      font-weight: 400;
+      letter-spacing: 1px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      position: relative;
+    }
+    
+    .nav-item::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: var(--gold);
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    
+    .nav-item:hover {
+      color: var(--ivory);
+      background: var(--white-3);
+    }
+    
+    .nav-item.active {
+      color: var(--gold);
+      background: var(--gold-glow);
+    }
+    
+    .nav-item.active::before {
+      opacity: 1;
+    }
+    
+    .nav-icon {
+      font-size: 14px;
+      opacity: 0.6;
+    }
+    
+    .nav-item:hover .nav-icon,
+    .nav-item.active .nav-icon {
+      opacity: 1;
+    }
+    
+    /* SIDEBAR FOOTER */
+    .sidebar-footer {
+      padding: 32px;
+      border-top: 1px solid var(--white-5);
+    }
+    
+    .connection-status {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 16px;
+      background: var(--graphite);
+      border: 1px solid var(--white-5);
+    }
+    
+    .connection-dot {
+      width: 8px;
+      height: 8px;
+      background: var(--gold);
+      border-radius: 50%;
+    }
+    
+    .connection-info {
+      flex: 1;
+    }
+    
+    .connection-label {
+      font-size: 9px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--silver);
+    }
+    
+    .connection-value {
+      font-size: 11px;
+      color: var(--ivory);
+      margin-top: 2px;
+    }
+    
+    /* ═══════════════════════════════════════════════════════════════
+       MAIN CONTENT
+    ═══════════════════════════════════════════════════════════════ */
+    .main {
+      padding: 0;
+      overflow-y: auto;
+      background: var(--obsidian);
+    }
+    
+    /* Top bar - Minimal */
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 32px 48px;
+      border-bottom: 1px solid var(--white-5);
+      background: var(--onyx);
+    }
+    
+    .page-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 300;
+      font-size: 32px;
+      color: var(--ivory);
+      letter-spacing: 2px;
+    }
+    
+    .page-subtitle {
+      font-size: 11px;
+      color: var(--pewter);
+      margin-top: 4px;
+      letter-spacing: 1px;
+    }
+    
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 32px;
+    }
+    
+    .datetime {
+      text-align: right;
+    }
+    
+    .datetime-time {
+      font-size: 24px;
+      color: var(--ivory);
+      font-weight: 300;
+      letter-spacing: 2px;
+    }
+    
+    .datetime-date {
+      font-size: 10px;
+      color: var(--silver);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+    
+    /* Content */
+    .content {
+      padding: 48px;
+    }
+    
+    /* Stats - Elegant cards */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 24px;
+      margin-bottom: 48px;
+    }
+    
+    .stat-card {
+      background: var(--graphite);
+      border: 1px solid var(--white-5);
+      padding: 28px;
+      transition: all 0.3s ease;
+    }
+    
+    .stat-card:hover {
+      border-color: var(--gold-dim);
+      transform: translateY(-2px);
+    }
+    
+    .stat-label {
+      font-size: 10px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--pewter);
+      margin-bottom: 12px;
+    }
+    
+    .stat-value {
+      font-size: 42px;
+      font-weight: 300;
+      color: var(--ivory);
+      line-height: 1;
+      letter-spacing: -1px;
+    }
+    
+    .stat-value.gold { color: var(--gold); }
+    .stat-value.silver { color: var(--silver); }
+    .stat-value.bronze { color: var(--bronze); }
+    
+    .stat-subtext {
+      font-size: 11px;
+      color: var(--pewter);
+      margin-top: 8px;
+    }
+    
+    /* ═══════════════════════════════════════════════════════════════
+       TWO COLUMN LAYOUT
+    ═══════════════════════════════════════════════════════════════ */
+    .two-col {
+      display: grid;
+      grid-template-columns: 1.2fr 1fr;
+      gap: 32px;
+      margin-bottom: 48px;
+    }
+    
+    /* SQUAD CARD - Refined */
+    .squad-card {
+      background: var(--graphite);
+      border: 1px solid var(--white-5);
+    }
+    
+    .squad-header {
+      padding: 32px;
+      border-bottom: 1px solid var(--white-5);
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+    }
+    
+    .squad-name {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 400;
+      font-size: 24px;
+      color: var(--ivory);
+      letter-spacing: 3px;
+    }
+    
+    .squad-meta {
+      font-size: 10px;
+      color: var(--gold);
+      margin-top: 6px;
+      letter-spacing: 2px;
+    }
+    
+    .squad-power {
+      text-align: right;
+    }
+    
+    .squad-power-value {
+      font-size: 36px;
+      font-weight: 300;
+      color: var(--ivory);
+    }
+    
+    .squad-power-label {
+      font-size: 9px;
+      letter-spacing: 2px;
+      color: var(--pewter);
+      text-transform: uppercase;
+    }
+    
+    /* Members - Clean list */
+    .members-list {
+      padding: 16px 0;
+    }
+    
+    .member {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 32px;
+      border-bottom: 1px solid var(--white-3);
+      transition: background 0.3s;
+    }
+    
+    .member:last-child {
+      border-bottom: none;
+    }
+    
+    .member:hover {
+      background: var(--white-3);
+    }
+    
+    .member-left {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+    
+    .role-badge {
+      width: 48px;
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      border: 1px solid var(--pewter);
+      color: var(--silver);
+      transition: all 0.3s;
+    }
+    
+    .role-badge:hover {
+      border-color: var(--gold);
+      color: var(--gold);
+    }
+    
+    .role-badge.guardian { border-color: var(--bronze); color: var(--bronze); }
+    .role-badge.architect { border-color: var(--silver); color: var(--silver); }
+    .role-badge.striker { border-color: var(--gold); color: var(--gold); }
+    
+    .member-info {
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .member-id {
+      font-size: 13px;
+      color: var(--ivory);
+      font-weight: 400;
+    }
+    
+    .member-role {
+      font-size: 10px;
+      color: var(--pewter);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-top: 2px;
+    }
+    
+    .member-right {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+    }
+    
+    .member-score {
+      text-align: right;
+    }
+    
+    .member-score-value {
+      font-size: 18px;
+      font-weight: 400;
+      color: var(--ivory);
+    }
+    
+    .member-xp {
+      font-size: 10px;
+      color: var(--gold);
+      margin-top: 2px;
+    }
+    
+    /* EVENT LOG - Muted & Clean */
+    .log-panel {
+      background: var(--graphite);
+      border: 1px solid var(--white-5);
+      height: 100%;
+      min-height: 450px;
+    }
+    
+    .log-header {
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--white-5);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .log-title {
+      font-size: 11px;
+      letter-spacing: 2px;
+      color: var(--pewter);
+      text-transform: uppercase;
+    }
+    
+    .log-dot {
+      width: 6px;
+      height: 6px;
+      background: var(--gold);
+      border-radius: 50%;
+      opacity: 0.6;
+    }
+    
+    .log-body {
+      padding: 24px;
+      height: calc(100% - 65px);
+      overflow-y: auto;
+    }
+    
+    .log-entry {
+      display: flex;
+      gap: 16px;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--white-3);
+      font-size: 12px;
+    }
+    
+    .log-entry:last-child {
+      border-bottom: none;
+    }
+    
+    .log-time {
+      color: var(--pewter);
+      min-width: 70px;
+      font-size: 11px;
+    }
+    
+    .log-type {
+      color: var(--gold);
+      min-width: 100px;
+      font-weight: 500;
+    }
+    
+    .log-actor {
+      color: var(--silver);
+      flex: 1;
+    }
+    
+    /* ═══════════════════════════════════════════════════════════════
+       THREE COLUMN - TICKETS + LEADERBOARD + DOMAINS
+    ═══════════════════════════════════════════════════════════════ */
+    .three-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 24px;
+    }
+    
+    /* PANELS */
+    .panel {
+      background: var(--graphite);
+      border: 1px solid var(--white-5);
+    }
+    
+    .panel-header {
+      padding: 24px;
+      border-bottom: 1px solid var(--white-5);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .panel-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 400;
+      font-size: 16px;
+      color: var(--ivory);
+      letter-spacing: 2px;
+    }
+    
+    .panel-badge {
+      font-size: 10px;
+      color: var(--gold);
+      letter-spacing: 1px;
+    }
+    
+    /* Tickets */
+    .ticket-list {
+      padding: 8px 0;
+    }
+    
+    .ticket-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 24px;
+      border-bottom: 1px solid var(--white-3);
+      transition: background 0.3s;
+    }
+    
+    .ticket-item:last-child {
+      border-bottom: none;
+    }
+    
+    .ticket-item:hover {
+      background: var(--white-3);
+    }
+    
+    .ticket-info {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    
+    .ticket-name {
+      font-size: 13px;
+      color: var(--ivory);
+    }
+    
+    .ticket-meta {
+      font-size: 10px;
+      color: var(--pewter);
+      display: flex;
+      gap: 16px;
+    }
+    
+    .ticket-bond {
+      color: var(--gold);
+    }
+    
+    .ticket-status {
+      padding: 4px 12px;
+      font-size: 9px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      border: 1px solid;
+    }
+    
+    .ticket-status.open {
+      color: var(--silver);
+      border-color: var(--pewter);
+    }
+    
+    .ticket-status.claimed {
+      color: var(--gold);
+      border-color: var(--gold);
+    }
+    
+    /* Leaderboard */
+    .leader-list {
+      padding: 8px 0;
+    }
+    
+    .leader-item {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 14px 24px;
+      border-bottom: 1px solid var(--white-3);
+    }
+    
+    .leader-item:last-child {
+      border-bottom: none;
+    }
+    
+    .leader-rank {
+      width: 28px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--pewter);
+      border: 1px solid var(--pewter);
+    }
+    
+    .leader-rank.gold { color: #c9b896; border-color: #c9b896; }
+    .leader-rank.silver { color: #a8a8b0; border-color: #a8a8b0; }
+    .leader-rank.bronze { color: #9e7b5c; border-color: #9e7b5c; }
+    
+    .leader-id {
+      flex: 1;
+      font-size: 12px;
+      color: var(--silver);
+    }
+    
+    .leader-score {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--ivory);
+    }
+    
+    /* Domains */
+    .domain-list {
+      padding: 16px 24px;
+    }
+    
+    .domain-item {
+      margin-bottom: 20px;
+    }
+    
+    .domain-item:last-child {
+      margin-bottom: 0;
+    }
+    
+    .domain-header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+    
+    .domain-name {
+      font-size: 12px;
+      color: var(--silver);
+      letter-spacing: 1px;
+    }
+    
+    .domain-percent {
+      font-size: 12px;
+      color: var(--ivory);
+    }
+    
+    .domain-bar {
+      height: 3px;
+      background: var(--slate);
+    }
+    
+    .domain-fill {
+      height: 100%;
+      background: var(--gold);
+      transition: width 0.5s ease;
+    }
+    
+    .domain-fill.backend { background: var(--silver); }
+    .domain-fill.frontend { background: var(--bronze); }
+    .domain-fill.devops { background: var(--gold); }
+    .domain-fill.security { background: var(--copper); }
+    .domain-fill.research { background: var(--pewter); }
+    
+    /* ═══════════════════════════════════════════════════════════════
+       TICKET PROGRESS BARS
+    ═══════════════════════════════════════════════════════════════ */
+    .progress-section {
+      margin-bottom: 48px;
+    }
+    
+    .progress-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+    }
+    
+    .progress-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 400;
+      font-size: 18px;
+      color: var(--ivory);
+      letter-spacing: 2px;
+    }
+    
+    .progress-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 20px;
+    }
+    
+    .progress-item {
+      background: var(--graphite);
+      border: 1px solid var(--white-5);
+      padding: 20px;
+    }
+    
+    .progress-label {
+      font-size: 10px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--pewter);
+      margin-bottom: 12px;
+      display: flex;
+      justify-content: space-between;
+    }
+    
+    .progress-label span:last-child {
+      color: var(--ivory);
+    }
+    
+    .progress-bar {
+      height: 4px;
+      background: var(--slate);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .progress-fill {
+      height: 100%;
+      position: absolute;
+      left: 0;
+      top: 0;
+      transition: width 0.5s ease;
+    }
+    
+    .progress-fill.green { background: var(--silver); }
+    .progress-fill.amber { background: var(--gold); }
+    .progress-fill.cyan { background: var(--bronze); }
+    .progress-fill.red { background: var(--copper); }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <!-- ═══════════════════════════════════════════════════════════
+         SIDEBAR
+    ═══════════════════════════════════════════════════════════ -->
+    <aside class="sidebar">
+      <div class="sidebar-top">
+        <div class="logo">
+          <div class="logo-mark"></div>
+          <div>
+            <div class="logo-text">FORTRESS</div>
+            <div class="logo-subtitle">Command Center</div>
+          </div>
+        </div>
+      </div>
+      
+      <nav class="nav">
+        <button class="nav-item active">
+          <span class="nav-icon">◈</span>
+          <span>Overview</span>
+        </button>
+        <button class="nav-item">
+          <span class="nav-icon">◇</span>
+          <span>Squads</span>
+        </button>
+        <button class="nav-item">
+          <span class="nav-icon">○</span>
+          <span>Tickets</span>
+        </button>
+        <button class="nav-item">
+          <span class="nav-icon">□</span>
+          <span>Ledger</span>
+        </button>
+        <button class="nav-item">
+          <span class="nav-icon">△</span>
+          <span>Analytics</span>
+        </button>
+        <button class="nav-item">
+          <span class="nav-icon">✕</span>
+          <span>Archive</span>
+        </button>
+      </nav>
+      
+      <div class="sidebar-footer">
+        <div class="connection-status">
+          <div class="connection-dot"></div>
+          <div class="connection-info">
+            <div class="connection-label">System</div>
+            <div class="connection-value">Operational</div>
+          </div>
+        </div>
+      </div>
+    </aside>
+    
+    <!-- ═══════════════════════════════════════════════════════════
+         MAIN CONTENT
+    ═══════════════════════════════════════════════════════════ -->
+    <main class="main">
+      <div class="topbar">
+        <div>
+          <h1 class="page-title">Command Center</h1>
+          <p class="page-subtitle">Fortress Operations Overview</p>
+        </div>
+        <div class="topbar-right">
+          <div class="datetime">
+            <div class="datetime-time" id="time">14:32</div>
+            <div class="datetime-date" id="date">Friday, Feb 14</div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="content">
+        <!-- STATS -->
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-label">Total Actors</div>
+            <div class="stat-value">32</div>
+            <div class="stat-subtext">+3 this cycle</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Active Tickets</div>
+            <div class="stat-value gold">41</div>
+            <div class="stat-subtext">+8 this cycle</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">REP Staked</div>
+            <div class="stat-value silver">634</div>
+            <div class="stat-subtext">+156 this cycle</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Completion Rate</div>
+            <div class="stat-value bronze">61%</div>
+            <div class="stat-subtext">-2% this cycle</div>
+          </div>
+        </div>
+        
+        <!-- PROGRESS BARS -->
+        <div class="progress-section">
+          <div class="progress-header">
+            <span class="progress-title">Ticket Distribution</span>
+          </div>
+          <div class="progress-grid">
+            <div class="progress-item">
+              <div class="progress-label"><span>Open</span><span>14</span></div>
+              <div class="progress-bar">
+                <div class="progress-fill green" style="width: 34%"></div>
+              </div>
+            </div>
+            <div class="progress-item">
+              <div class="progress-label"><span>Claimed</span><span>1</span></div>
+              <div class="progress-bar">
+                <div class="progress-fill cyan" style="width: 2%"></div>
+              </div>
+            </div>
+            <div class="progress-item">
+              <div class="progress-label"><span>Completed</span><span>25</span></div>
+              <div class="progress-bar">
+                <div class="progress-fill green" style="width: 61%"></div>
+              </div>
+            </div>
+            <div class="progress-item">
+              <div class="progress-label"><span>Forfeited</span><span>1</span></div>
+              <div class="progress-bar">
+                <div class="progress-fill red" style="width: 2%"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- SQUAD + LOG -->
+        <div class="two-col">
+          <!-- SQUAD -->
+          <div class="squad-card">
+            <div class="squad-header">
+              <div>
+                <div class="squad-name">Alpha Squad</div>
+                <div class="squad-meta">Deployment Ready — ID #8821</div>
+              </div>
+              <div class="squad-power">
+                <div class="squad-power-value">247</div>
+                <div class="squad-power-label">Total Power</div>
+              </div>
+            </div>
+            
+            <div class="members-list">
+              <div class="member">
+                <div class="member-left">
+                  <div class="role-badge guardian">🛡</div>
+                  <div class="member-info">
+                    <div class="member-id">e394ace6-e146-4308-84d6-144ffcce2b37</div>
+                    <div class="member-role">Guardian</div>
+                  </div>
+                </div>
+                <div class="member-right">
+                  <div class="member-score">
+                    <div class="member-score-value">87.2</div>
+                    <div class="member-xp">+2,400 XP</div>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="member">
+                <div class="member-left">
+                  <div class="role-badge architect">◇</div>
+                  <div class="member-info">
+                    <div class="member-id">7d3c1e8a-9f2b-4c5d-a6e8-1b3d5f7a9c2e</div>
+                    <div class="member-role">Architect</div>
+                  </div>
+                </div>
+                <div class="member-right">
+                  <div class="member-score">
+                    <div class="member-score-value">92.5</div>
+                    <div class="member-xp">+3,100 XP</div>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="member">
+                <div class="member-left">
+                  <div class="role-badge striker">⚔</div>
+                  <div class="member-info">
+                    <div class="member-id">9a2b5c7d-3e8f-4a1b-9c6d-2f7e8a1b3c4d</div>
+                    <div class="member-role">Striker</div>
+                  </div>
+                </div>
+                <div class="member-right">
+                  <div class="member-score">
+                    <div class="member-score-value">67.3</div>
+                    <div class="member-xp">+1,800 XP</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- EVENT LOG -->
+          <div class="log-panel">
+            <div class="log-header">
+              <span class="log-title">Event Log</span>
+              <div class="log-dot"></div>
+            </div>
+            <div class="log-body">
+              <div class="log-entry">
+                <span class="log-time">14:32:07</span>
+                <span class="log-type">CONTRIBUTION</span>
+                <span class="log-actor">e394ace6</span>
+              </div>
+              <div class="log-entry">
+                <span class="log-time">14:31:42</span>
+                <span class="log-type">VERIFICATION</span>
+                <span class="log-actor">7d3c1e8a</span>
+              </div>
+              <div class="log-entry">
+                <span class="log-time">14:30:18</span>
+                <span class="log-type">STAKE</span>
+                <span class="log-actor">9a2b5c7d</span>
+              </div>
+              <div class="log-entry">
+                <span class="log-time">14:29:55</span>
+                <span class="log-type">CONTRIBUTION</span>
+                <span class="log-actor">e05e2a7c</span>
+              </div>
+              <div class="log-entry">
+                <span class="log-time">14:28:33</span>
+                <span class="log-type">COMPLETE</span>
+                <span class="log-actor">6860abcf</span>
+              </div>
+              <div class="log-entry">
+                <span class="log-time">14:27:10</span>
+                <span class="log-type">CLAIM</span>
+                <span class="log-actor">7d3c1e8a</span>
+              </div>
+              <div class="log-entry">
+                <span class="log-time">14:25:47</span>
+                <span class="log-type">FORFEIT</span>
+                <span class="log-actor">4a5b6c7d</span>
+              </div>
+              <div class="log-entry">
+                <span class="log-time">14:24:12</span>
+                <span class="log-type">CONTRIBUTION</span>
+                <span class="log-actor">1a2b3c4d</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- THREE COLUMN -->
+        <div class="three-col">
+          <!-- TICKETS -->
+          <div class="panel">
+            <div class="panel-header">
+              <span class="panel-title">Active Tickets</span>
+              <span class="panel-badge">14 pending</span>
+            </div>
+            <div class="ticket-list">
+              <div class="ticket-item">
+                <div class="ticket-info">
+                  <div class="ticket-name">Sim Ticket 2</div>
+                  <div class="ticket-meta">
+                    <span class="ticket-bond">⟐ 30 REP</span>
+                    <span>sim-4c8c5e68</span>
+                  </div>
+                </div>
+                <span class="ticket-status open">Open</span>
+              </div>
+              <div class="ticket-item">
+                <div class="ticket-info">
+                  <div class="ticket-name">Add dark mode feature</div>
+                  <div class="ticket-meta">
+                    <span class="ticket-bond">⟐ 30 REP</span>
+                    <span>wp-github-test</span>
+                  </div>
+                </div>
+                <span class="ticket-status open">Open</span>
+              </div>
+              <div class="ticket-item">
+                <div class="ticket-info">
+                  <div class="ticket-name">High Bond Ticket</div>
+                  <div class="ticket-meta">
+                    <span class="ticket-bond">⟐ 50 REP</span>
+                    <span>wp-test-2</span>
+                  </div>
+                </div>
+                <span class="ticket-status open">Open</span>
+              </div>
+              <div class="ticket-item">
+                <div class="ticket-info">
+                  <div class="ticket-name">Open Ticket 1</div>
+                  <div class="ticket-meta">
+                    <span class="ticket-bond">⟐ 10 REP</span>
+                    <span>wp-query-1</span>
+                  </div>
+                </div>
+                <span class="ticket-status claimed">Claimed</span>
+              </div>
+            </div>
+          </div>
+          
+          <!-- LEADERBOARD -->
+          <div class="panel">
+            <div class="panel-header">
+              <span class="panel-title">REP Leaders</span>
+            </div>
+            <div class="leader-list">
+              <div class="leader-item">
+                <div class="leader-rank gold">1</div>
+                <div class="leader-id">e394ace6-e146-4308</div>
+                <div class="leader-score">1,000</div>
+              </div>
+              <div class="leader-item">
+                <div class="leader-rank silver">2</div>
+                <div class="leader-id">e05e2a7c-d2ff-4132</div>
+                <div class="leader-score">1,000</div>
+              </div>
+              <div class="leader-item">
+                <div class="leader-rank bronze">3</div>
+                <div class="leader-id">6860abcf-94b9-4b64</div>
+                <div class="leader-score">1,000</div>
+              </div>
+              <div class="leader-item">
+                <div class="leader-rank">4</div>
+                <div class="leader-id">7d3c1e8a-9f2b-4c5d</div>
+                <div class="leader-score">995</div>
+              </div>
+              <div class="leader-item">
+                <div class="leader-rank">5</div>
+                <div class="leader-id">9a2b5c7d-3e8f-4a1b</div>
+                <div class="leader-score">980</div>
+              </div>
+              <div class="leader-item">
+                <div class="leader-rank">6</div>
+                <div class="leader-id">4a5b6c7d-8e9f-1a2b</div>
+                <div class="leader-score">975</div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- DOMAINS -->
+          <div class="panel">
+            <div class="panel-header">
+              <span class="panel-title">Domains</span>
+            </div>
+            <div class="domain-list">
+              <div class="domain-item">
+                <div class="domain-header">
+                  <span class="domain-name">Backend</span>
+                  <span class="domain-percent">45%</span>
+                </div>
+                <div class="domain-bar">
+                  <div class="domain-fill backend" style="width: 45%"></div>
+                </div>
+              </div>
+              <div class="domain-item">
+                <div class="domain-header">
+                  <span class="domain-name">Frontend</span>
+                  <span class="domain-percent">30%</span>
+                </div>
+                <div class="domain-bar">
+                  <div class="domain-fill frontend" style="width: 30%"></div>
+                </div>
+              </div>
+              <div class="domain-item">
+                <div class="domain-header">
+                  <span class="domain-name">DevOps</span>
+                  <span class="domain-percent">15%</span>
+                </div>
+                <div class="domain-bar">
+                  <div class="domain-fill devops" style="width: 15%"></div>
+                </div>
+              </div>
+              <div class="domain-item">
+                <div class="domain-header">
+                  <span class="domain-name">Security</span>
+                  <span class="domain-percent">7%</span>
+                </div>
+                <div class="domain-bar">
+                  <div class="domain-fill security" style="width: 7%"></div>
+                </div>
+              </div>
+              <div class="domain-item">
+                <div class="domain-header">
+                  <span class="domain-name">Research</span>
+                  <span class="domain-percent">3%</span>
+                </div>
+                <div class="domain-bar">
+                  <div class="domain-fill research" style="width: 3%"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+  
+  <script>
+    // Clock & Date
+    function updateDateTime() {
+      const now = new Date();
+      const time = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
+      const date = now.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
+      document.getElementById('time').textContent = time;
+      document.getElementById('date').textContent = date;
+    }
+    updateDateTime();
+    setInterval(updateDateTime, 1000);
+  </script>
+</body>
+</html>

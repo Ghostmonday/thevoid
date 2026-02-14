@@ -1,0 +1,1134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fated Fortress | The Guild</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Satoshi:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        @import url('https://api.fontshare.com/v2/css?f[]=satoshi@300,400,500,600,700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #F7F5F2;
+            --bg-secondary: #FFFFFF;
+            --bg-tertiary: #EDEAE5;
+            --bg-card: #FFFFFF;
+            --accent-primary: #1A1A2E;
+            --accent-secondary: #4A4E69;
+            --accent-highlight: #C9A227;
+            --accent-warm: #8B4513;
+            --status-success: #2D5A27;
+            --status-warning: #B8860B;
+            --status-error: #8B0000;
+            --status-info: #1E3A5F;
+            --text-primary: #1A1A2E;
+            --text-secondary: #4A4E69;
+            --text-muted: #9A9EB0;
+            --border-light: #E0DCD5;
+            --border-accent: #C9A227;
+            --sidebar-width: 260px;
+            --sidebar-collapsed: 72px;
+        }
+
+        body {
+            font-family: 'Satoshi', 'DM Sans', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Top Navigation */
+        .topbar {
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-light);
+            padding: 16px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 69px;
+            z-index: 100;
+            transition: left 0.3s ease;
+        }
+
+        .topbar.sidebar-expanded { left: var(--sidebar-width); }
+        .topbar.sidebar-collapsed { left: var(--sidebar-collapsed); }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .menu-toggle {
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-tertiary);
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 18px;
+        }
+
+        .menu-toggle:hover { background: var(--accent-highlight); color: white; }
+
+        .logo-icon {
+            width: 36px;
+            height: 36px;
+            position: relative;
+        }
+
+        .logo-icon::before {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, var(--accent-highlight), var(--accent-warm));
+            clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+        }
+
+        .logo-text {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 16px;
+            font-weight: 700;
+            letter-spacing: 3px;
+            color: var(--accent-primary);
+        }
+
+        .topbar-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .search-box {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--bg-tertiary);
+            padding: 8px 16px;
+            border-radius: 8px;
+            border: 1px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .search-box:focus-within {
+            border-color: var(--accent-highlight);
+            background: var(--bg-secondary);
+        }
+
+        .search-box input {
+            border: none;
+            background: transparent;
+            outline: none;
+            font-family: inherit;
+            font-size: 13px;
+            width: 180px;
+            color: var(--text-primary);
+        }
+
+        .search-box input::placeholder { color: var(--text-muted); }
+
+        .nav-links { display: flex; gap: 16px; }
+
+        .nav-link {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 10px;
+            font-weight: 500;
+            letter-spacing: 2px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            text-transform: uppercase;
+            transition: color 0.2s;
+            padding: 8px 0;
+            position: relative;
+        }
+
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--accent-highlight);
+            transition: width 0.3s;
+        }
+
+        .nav-link:hover { color: var(--accent-highlight); }
+        .nav-link:hover::after { width: 100%; }
+        .nav-link.active { color: var(--accent-highlight); }
+        .nav-link.active::after { width: 100%; }
+
+        .cta-button {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: 2px;
+            padding: 10px 18px;
+            background: linear-gradient(135deg, var(--accent-highlight), var(--accent-warm));
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            text-transform: uppercase;
+            transition: all 0.3s;
+        }
+
+        .cta-button:hover { transform: translateY(-2px); box-shadow: 0 4px 20px rgba(201, 162, 39, 0.3); }
+
+        .notification-btn {
+            position: relative;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-tertiary);
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.2s;
+        }
+
+        .notification-btn:hover { background: var(--accent-highlight); color: white; }
+
+        .notification-badge {
+            position: absolute;
+            top: -4px;
+            right: -4px;
+            width: 18px;
+            height: 18px;
+            background: var(--status-error);
+            color: white;
+            font-size: 10px;
+            font-weight: 600;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 6px 12px 6px 6px;
+            background: var(--bg-tertiary);
+            border-radius: 24px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .user-menu:hover { background: var(--border-light); }
+
+        .user-avatar {
+            width: 28px;
+            height: 28px;
+            background: linear-gradient(135deg, var(--accent-highlight), var(--accent-warm));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 10px;
+            font-weight: 700;
+            color: white;
+        }
+
+        .user-name {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        /* Sidebar */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            width: var(--sidebar-width);
+            background: var(--bg-secondary);
+            border-right: 1px solid var(--border-light);
+            padding: 24px 16px;
+            z-index: 99;
+            transition: all 0.3s ease;
+            overflow-y: auto;
+        }
+
+        .sidebar.collapsed {
+            width: var(--sidebar-collapsed);
+            padding: 24px 12px;
+        }
+
+        .sidebar.collapsed .sidebar-title,
+        .sidebar.collapsed .nav-item span:not(.nav-icon),
+        .sidebar.collapsed .guild-info { opacity: 0; width: 0; overflow: hidden; }
+
+        .sidebar.collapsed .nav-item {
+            justify-content: center;
+            padding: 12px;
+        }
+
+        .sidebar.collapsed .nav-item.active { border-left: none; border-radius: 8px; }
+
+        .sidebar-section { margin-bottom: 24px; }
+
+        .sidebar-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        .sidebar-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: 2px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            transition: opacity 0.3s;
+        }
+
+        .collapse-btn {
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            color: var(--text-muted);
+            font-size: 14px;
+            transition: all 0.2s;
+            border-radius: 4px;
+        }
+
+        .collapse-btn:hover { background: var(--bg-tertiary); color: var(--accent-highlight); }
+        .sidebar.collapsed .collapse-btn { transform: rotate(180deg); }
+
+        .nav-group { margin-bottom: 16px; }
+
+        .nav-section-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 9px;
+            font-weight: 600;
+            letter-spacing: 2px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            margin-bottom: 8px;
+            padding-left: 12px;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            margin: 4px 0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            white-space: nowrap;
+        }
+
+        .nav-item:hover { background: var(--bg-tertiary); color: var(--accent-primary); }
+
+        .nav-item.active {
+            background: linear-gradient(135deg, rgba(201, 162, 39, 0.1), rgba(139, 69, 19, 0.05));
+            color: var(--accent-highlight);
+            border-left: 3px solid var(--accent-highlight);
+        }
+
+        .nav-icon {
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+        }
+
+        .nav-badge {
+            margin-left: auto;
+            background: var(--accent-highlight);
+            color: white;
+            font-size: 10px;
+            font-weight: 600;
+            padding: 2px 8px;
+            border-radius: 10px;
+        }
+
+        .guild-info {
+            background: linear-gradient(135deg, var(--accent-primary), #2D2D4A);
+            border-radius: 12px;
+            padding: 20px;
+            color: white;
+            margin-top: auto;
+            transition: opacity 0.3s;
+        }
+
+        .guild-info-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 2px;
+            margin-bottom: 12px;
+        }
+
+        .guild-info-stats { display: flex; gap: 16px; }
+
+        .guild-info-stat { text-align: center; }
+
+        .guild-info-stat-value {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--accent-highlight);
+        }
+
+        .guild-info-stat-label {
+            font-size: 9px;
+            opacity: 0.7;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Main Content */
+        .main-container {
+            margin-top: 69px;
+            min-height: calc(100vh - 69px);
+            transition: margin-left 0.3s ease;
+        }
+
+        .main-container.sidebar-expanded { margin-left: var(--sidebar-width); }
+        .main-container.sidebar-collapsed { margin-left: var(--sidebar-collapsed); }
+
+        .content { padding: 32px; }
+
+        /* Page Header */
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 32px;
+        }
+
+        .page-title-section h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--accent-primary);
+            letter-spacing: 2px;
+        }
+
+        .page-title-section p { font-size: 14px; color: var(--text-muted); margin-top: 4px; }
+
+        .page-actions { display: flex; gap: 12px; }
+
+        .btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-family: 'Satoshi', sans-serif;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent-highlight), var(--accent-warm));
+            color: white;
+        }
+
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 4px 20px rgba(201, 162, 39, 0.3); }
+
+        .btn-secondary {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-light);
+        }
+
+        .btn-secondary:hover { border-color: var(--accent-highlight); color: var(--accent-highlight); }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin-bottom: 32px;
+        }
+
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-light);
+            border-radius: 12px;
+            padding: 24px;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: var(--accent-highlight);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .stat-card:hover {
+            border-color: var(--accent-highlight);
+            box-shadow: 0 4px 20px rgba(201, 162, 39, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .stat-card:hover::before { opacity: 1; }
+
+        .stat-icon {
+            width: 40px;
+            height: 40px;
+            background: var(--bg-tertiary);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            margin-bottom: 16px;
+        }
+
+        .stat-value {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--accent-primary);
+            letter-spacing: 2px;
+        }
+
+        .stat-label { font-size: 12px; font-weight: 500; color: var(--text-muted); margin-top: 4px; }
+
+        .stat-trend {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 11px;
+            font-weight: 600;
+            margin-top: 12px;
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+
+        .trend-up { background: rgba(45, 90, 39, 0.1); color: var(--status-success); }
+        .trend-down { background: rgba(139, 0, 0, 0.1); color: var(--status-error); }
+
+        /* Cards */
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-light);
+            border-radius: 12px;
+            padding: 24px;
+            transition: all 0.3s;
+        }
+
+        .card:hover { border-color: var(--border-accent); box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05); }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        .card-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 2px;
+            color: var(--accent-primary);
+            text-transform: uppercase;
+        }
+
+        .card-badge {
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: 1px;
+            padding: 4px 10px;
+            border-radius: 4px;
+            background: var(--bg-tertiary);
+            color: var(--text-secondary);
+        }
+
+        .card-badge.success { background: rgba(45, 90, 39, 0.1); color: var(--status-success); }
+        .card-badge.warning { background: rgba(184, 134, 11, 0.1); color: var(--status-warning); }
+
+        /* Quest Item */
+        .quest-item {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 16px;
+            background: var(--bg-tertiary);
+            border-radius: 10px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid transparent;
+        }
+
+        .quest-item:hover {
+            background: var(--bg-secondary);
+            border-color: var(--border-light);
+            transform: translateX(4px);
+        }
+
+        .quest-icon {
+            width: 44px;
+            height: 44px;
+            background: linear-gradient(135deg, var(--accent-highlight), var(--accent-warm));
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            color: white;
+            flex-shrink: 0;
+        }
+
+        .quest-info { flex: 1; }
+
+        .quest-title { font-size: 14px; font-weight: 600; color: var(--text-primary); margin-bottom: 4px; }
+
+        .quest-meta { display: flex; gap: 16px; font-size: 11px; color: var(--text-muted); }
+
+        .quest-reward {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--accent-highlight);
+        }
+
+        .quest-status {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .quest-status.open { background: var(--status-success); box-shadow: 0 0 8px rgba(45, 90, 39, 0.4); }
+        .quest-status.in-progress { background: var(--status-warning); box-shadow: 0 0 8px rgba(184, 134, 11, 0.4); }
+
+        /* Activity */
+        .activity-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 14px 0;
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        .activity-item:last-child { border-bottom: none; }
+        .activity-item:hover { background: var(--bg-tertiary); margin: 0 -12px; padding: 14px 12px; border-radius: 8px; }
+
+        .activity-avatar {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, var(--accent-highlight), var(--accent-warm));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 10px;
+            font-weight: 700;
+            color: white;
+            flex-shrink: 0;
+        }
+
+        .activity-content { flex: 1; }
+
+        .activity-text { font-size: 13px; color: var(--text-primary); line-height: 1.5; }
+        .activity-text strong { font-weight: 600; color: var(--accent-primary); }
+        .activity-time { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
+
+        /* Builder Row */
+        .builder-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px;
+            border-radius: 10px;
+            margin-bottom: 8px;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .builder-item:hover { background: var(--bg-tertiary); }
+
+        .builder-rank {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 14px;
+            font-weight: 700;
+            width: 28px;
+            color: var(--accent-highlight);
+        }
+
+        .builder-rank.gold { color: #C9A227; }
+        .builder-rank.silver { color: #8E8E93; }
+        .builder-rank.bronze { color: #CD7F32; }
+
+        .builder-avatar {
+            width: 36px;
+            height: 36px;
+            background: var(--bg-tertiary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--text-secondary);
+        }
+
+        .builder-info { flex: 1; }
+        .builder-name { font-size: 13px; font-weight: 600; color: var(--text-primary); }
+        .builder-squad { font-size: 11px; color: var(--text-muted); }
+
+        .builder-score {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--accent-primary);
+        }
+
+        /* Progress */
+        .progress-container { margin-top: 16px; }
+
+        .progress-header { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 11px; }
+
+        .progress-label { font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 1px; }
+
+        .progress-value { font-family: 'Orbitron', sans-serif; font-weight: 600; color: var(--accent-primary); }
+
+        .progress-bar { height: 8px; background: var(--bg-tertiary); border-radius: 4px; overflow: hidden; }
+
+        .progress-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.5s ease;
+        }
+
+        .progress-fill.gold { background: linear-gradient(90deg, var(--accent-highlight), var(--accent-warm)); }
+
+        /* Cards Grid */
+        .cards-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; margin-bottom: 32px; }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .fade-in { animation: fadeIn 0.4s ease forwards; }
+        .delay-1 { animation-delay: 0.1s; }
+        .delay-2 { animation-delay: 0.2s; }
+        .delay-3 { animation-delay: 0.3s; }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+            .cards-grid { grid-template-columns: 1fr; }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar { transform: translateX(-100%); }
+            .sidebar.mobile-open { transform: translateX(0); }
+            .topbar { left: 0 !important; }
+            .main-container { margin-left: 0 !important; }
+            .nav-links { display: none; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Top Navigation -->
+    <nav class="topbar sidebar-expanded" id="topbar">
+        <div class="logo-section">
+            <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
+            <div class="logo-icon"></div>
+            <span class="logo-text">FATED FORTRESS</span>
+        </div>
+        
+        <div class="search-box">
+            <span>🔍</span>
+            <input type="text" placeholder="Search quests, builders..." />
+        </div>
+        
+        <div class="topbar-right">
+            <div class="nav-links">
+                <a href="dashboard.html" class="nav-link active">Dashboard</a>
+                <a href="guild.html" class="nav-link">The Guild</a>
+                <a href="quests.html" class="nav-link">Quests</a>
+                <a href="squads.html" class="nav-link">Squads</a>
+            </div>
+            
+            <button class="notification-btn">
+                🔔
+                <span class="notification-badge">3</span>
+            </button>
+            
+            <div class="user-menu">
+                <div class="user-avatar">E3</div>
+                <span class="user-name">e394ace6</span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Sidebar -->
+    <aside class="sidebar expanded" id="sidebar">
+        <div class="sidebar-section">
+            <div class="sidebar-header">
+                <span class="sidebar-title">Navigation</span>
+                <button class="collapse-btn" onclick="toggleSidebar()">◀</button>
+            </div>
+            
+            <div class="nav-group">
+                <div class="nav-section-title">Main</div>
+                <a href="dashboard.html" class="nav-item active">
+                    <span class="nav-icon">⌂</span>
+                    <span>Dashboard</span>
+                </a>
+                <a href="guild.html" class="nav-item">
+                    <span class="nav-icon">⚔</span>
+                    <span>The Guild</span>
+                </a>
+                <a href="quests.html" class="nav-item">
+                    <span class="nav-icon">📜</span>
+                    <span>Quest Board</span>
+                    <span class="nav-badge">14</span>
+                </a>
+                <a href="squads.html" class="nav-item">
+                    <span class="nav-icon">👥</span>
+                    <span>Squads</span>
+                </a>
+            </div>
+            
+            <div class="nav-group">
+                <div class="nav-section-title">Finance</div>
+                <a href="ledger.html" class="nav-item">
+                    <span class="nav-icon">💰</span>
+                    <span>Ledger</span>
+                </a>
+                <a href="leaderboard.html" class="nav-item">
+                    <span class="nav-icon">🏆</span>
+                    <span>Leaderboard</span>
+                </a>
+            </div>
+            
+            <div class="nav-group">
+                <div class="nav-section-title">System</div>
+                <a href="profile.html" class="nav-item">
+                    <span class="nav-icon">👤</span>
+                    <span>Profile</span>
+                </a>
+                <a href="settings.html" class="nav-item">
+                    <span class="nav-icon">⚙</span>
+                    <span>Settings</span>
+                </a>
+                <a href="cemetery.html" class="nav-item">
+                    <span class="nav-icon">❌</span>
+                    <span>Cemetery</span>
+                </a>
+            </div>
+        </div>
+        
+        <div class="guild-info">
+            <div class="guild-info-title">⚔ GUILD STATS</div>
+            <div class="guild-info-stats">
+                <div class="guild-info-stat">
+                    <div class="guild-info-stat-value">32</div>
+                    <div class="guild-info-stat-label">Builders</div>
+                </div>
+                <div class="guild-info-stat">
+                    <div class="guild-info-stat-value">14</div>
+                    <div class="guild-info-stat-label">Quests</div>
+                </div>
+                <div class="guild-info-stat">
+                    <div class="guild-info-stat-value">634</div>
+                    <div class="guild-info-stat-label">REP</div>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="main-container sidebar-expanded" id="mainContainer">
+        <main class="content">
+            <!-- Page Header -->
+            <div class="page-header fade-in">
+                <div class="page-title-section">
+                    <h1>Command Deck</h1>
+                    <p>Welcome back, e394ace6. 3 new quests available.</p>
+                </div>
+                <div class="page-actions">
+                    <button class="btn btn-secondary">
+                        <span>⟳</span> Refresh
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Stats Grid -->
+            <div class="stats-grid fade-in">
+                <div class="stat-card">
+                    <div class="stat-icon">👥</div>
+                    <div class="stat-value">32</div>
+                    <div class="stat-label">Active Builders</div>
+                    <span class="stat-trend trend-up">▲ +4 this week</span>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">📜</div>
+                    <div class="stat-value">14</div>
+                    <div class="stat-label">Open Quests</div>
+                    <span class="stat-trend trend-up">▲ 6 completed</span>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">💎</div>
+                    <div class="stat-value">634</div>
+                    <div class="stat-label">Total REP</div>
+                    <span class="stat-trend trend-up">▲ +128 today</span>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">✓</div>
+                    <div class="stat-value">61%</div>
+                    <div class="stat-label">Verify Rate</div>
+                    <span class="stat-trend trend-down">▼ -2%</span>
+                </div>
+            </div>
+            
+            <!-- Cards Grid -->
+            <div class="cards-grid">
+                <!-- Quest Board -->
+                <div class="card fade-in delay-1">
+                    <div class="card-header">
+                        <span class="card-title">Quest Board</span>
+                        <a href="quests.html" class="btn btn-secondary" style="padding: 6px 12px; font-size: 11px;">View All →</a>
+                    </div>
+                    
+                    <div class="quest-item">
+                        <div class="quest-icon">🎨</div>
+                        <div class="quest-info">
+                            <div class="quest-title">Dark Mode Implementation</div>
+                            <div class="quest-meta"><span>Frontend</span><span>3 builders</span></div>
+                        </div>
+                        <div class="quest-reward">30 REP</div>
+                        <span class="quest-status in-progress"></span>
+                    </div>
+                    
+                    <div class="quest-item">
+                        <div class="quest-icon">⚙</div>
+                        <div class="quest-info">
+                            <div class="quest-title">API Integration</div>
+                            <div class="quest-meta"><span>Backend</span><span>2 builders</span></div>
+                        </div>
+                        <div class="quest-reward">25 REP</div>
+                        <span class="quest-status open"></span>
+                    </div>
+                    
+                    <div class="quest-item">
+                        <div class="quest-icon">🚀</div>
+                        <div class="quest-info">
+                            <div class="quest-title">Deploy Pipeline Setup</div>
+                            <div class="quest-meta"><span>DevOps</span><span>1 builder</span></div>
+                        </div>
+                        <div class="quest-reward">35 REP</div>
+                        <span class="quest-status open"></span>
+                    </div>
+                </div>
+                
+                <!-- Guild Activity -->
+                <div class="card fade-in delay-2">
+                    <div class="card-header">
+                        <span class="card-title">Guild Activity</span>
+                        <span class="card-badge success">LIVE</span>
+                    </div>
+                    
+                    <div class="activity-item">
+                        <div class="activity-avatar">7D</div>
+                        <div class="activity-content">
+                            <div class="activity-text"><strong>7d3c1e8a</strong> submitted a contribution</div>
+                            <div class="activity-time">2 minutes ago</div>
+                        </div>
+                    </div>
+                    
+                    <div class="activity-item">
+                        <div class="activity-avatar">E3</div>
+                        <div class="activity-content">
+                            <div class="activity-text"><strong>e394ace6</strong> verified Dark Mode quest</div>
+                            <div class="activity-time">5 minutes ago</div>
+                        </div>
+                    </div>
+                    
+                    <div class="activity-item">
+                        <div class="activity-avatar">9A</div>
+                        <div class="activity-content">
+                            <div class="activity-text"><strong>9a2b5c7d</strong> staked 30 REP</div>
+                            <div class="activity-time">12 minutes ago</div>
+                        </div>
+                    </div>
+                    
+                    <div class="activity-item">
+                        <div class="activity-avatar">68</div>
+                        <div class="activity-content">
+                            <div class="activity-text"><strong>6860a9f2</strong> completed Unit Tests!</div>
+                            <div class="activity-time">18 minutes ago</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Leaderboard & Progress -->
+            <div class="cards-grid">
+                <div class="card fade-in delay-3">
+                    <div class="card-header">
+                        <span class="card-title">Top Builders</span>
+                        <a href="leaderboard.html" class="btn btn-secondary" style="padding: 6px 12px; font-size: 11px;">Full List →</a>
+                    </div>
+                    
+                    <div class="builder-item">
+                        <span class="builder-rank gold">1</span>
+                        <div class="builder-avatar">E3</div>
+                        <div class="builder-info">
+                            <div class="builder-name">e394ace6</div>
+                            <div class="builder-squad">Alpha Squad</div>
+                        </div>
+                        <div class="builder-score">1,000</div>
+                    </div>
+                    
+                    <div class="builder-item">
+                        <span class="builder-rank silver">2</span>
+                        <div class="builder-avatar">7D</div>
+                        <div class="builder-info">
+                            <div class="builder-name">7d3c1e8a</div>
+                            <div class="builder-squad">Alpha Squad</div>
+                        </div>
+                        <div class="builder-score">1,000</div>
+                    </div>
+                    
+                    <div class="builder-item">
+                        <span class="builder-rank bronze">3</span>
+                        <div class="builder-avatar">68</div>
+                        <div class="builder-info">
+                            <div class="builder-name">6860a9f2</div>
+                            <div class="builder-squad">Beta Squad</div>
+                        </div>
+                        <div class="builder-score">987</div>
+                    </div>
+                </div>
+                
+                <div class="card fade-in delay-3">
+                    <div class="card-header">
+                        <span class="card-title">Guild Progress</span>
+                        <span class="card-badge">Weekly Goals</span>
+                    </div>
+                    
+                    <div class="progress-container">
+                        <div class="progress-header">
+                            <span class="progress-label">Quest Completion</span>
+                            <span class="progress-value">14 / 20</span>
+                        </div>
+                        <div class="progress-bar"><div class="progress-fill gold" style="width: 70%;"></div></div>
+                    </div>
+                    
+                    <div class="progress-container">
+                        <div class="progress-header">
+                            <span class="progress-label">New Builders</span>
+                            <span class="progress-value">4 / 10</span>
+                        </div>
+                        <div class="progress-bar"><div class="progress-fill gold" style="width: 40%;"></div></div>
+                    </div>
+                    
+                    <div class="progress-container">
+                        <div class="progress-header">
+                            <span class="progress-label">REP Earned</span>
+                            <span class="progress-value">634 / 1000</span>
+                        </div>
+                        <div class="progress-bar"><div class="progress-fill gold" style="width: 63%;"></div></div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        let sidebarExpanded = true;
+        
+        function toggleSidebar() {
+            sidebarExpanded = !sidebarExpanded;
+            
+            const sidebar = document.getElementById('sidebar');
+            const topbar = document.getElementById('topbar');
+            const mainContainer = document.getElementById('mainContainer');
+            
+            if (sidebarExpanded) {
+                sidebar.classList.remove('collapsed');
+                sidebar.classList.add('expanded');
+                topbar.classList.remove('sidebar-collapsed');
+                topbar.classList.add('sidebar-expanded');
+                mainContainer.classList.remove('sidebar-collapsed');
+                mainContainer.classList.add('sidebar-expanded');
+            } else {
+                sidebar.classList.remove('expanded');
+                sidebar.classList.add('collapsed');
+                topbar.classList.remove('sidebar-expanded');
+                topbar.classList.add('sidebar-collapsed');
+                mainContainer.classList.remove('sidebar-expanded');
+                mainContainer.classList.add('sidebar-collapsed');
+            }
+        }
+        
+        // Highlight active nav item
+        const currentPage = 'dashboard.html';
+        document.querySelectorAll('.nav-item').forEach(item => {
+            if (item.getAttribute('href') === currentPage) {
+                item.classList.add('active');
+            } else {
+                item.classList.remove('active');
+            }
+        });
+    </script>
+</body>
+</html>

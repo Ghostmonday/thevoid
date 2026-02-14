@@ -1,0 +1,984 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fated Fortress | Obsidian Sanctum</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600&family=Satoshi:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --obsidian: #0a0a0b;
+            --onyx: #141414;
+            --charcoal: #1c1c1c;
+            --champagne: #d4af37;
+            --champagne-light: #f0dc8c;
+            --rose-bronze: #b76e79;
+            --platinum: #e5e4e2;
+            --platinum-dim: #6b6b6b;
+            --ivory: #f5f3eb;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Satoshi', sans-serif;
+            background: var(--obsidian);
+            color: var(--ivory);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        /* Subtle noise texture overlay */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+            opacity: 0.03;
+            pointer-events: none;
+            z-index: 1000;
+        }
+        
+        .app-container {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            min-height: 100vh;
+        }
+        
+        /* SIDEBAR */
+        .sidebar {
+            background: linear-gradient(180deg, var(--onyx) 0%, var(--obsidian) 100%);
+            border-right: 1px solid rgba(212, 175, 55, 0.1);
+            padding: 48px 32px;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+        
+        .sidebar::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 1px;
+            height: 100%;
+            background: linear-gradient(180deg, var(--champagne) 0%, transparent 50%, var(--champagne) 100%);
+            opacity: 0.3;
+        }
+        
+        /* Logo Section */
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 64px;
+        }
+        
+        .logo-diamond {
+            width: 48px;
+            height: 48px;
+            position: relative;
+        }
+        
+        .logo-diamond svg {
+            width: 100%;
+            height: 100%;
+            filter: drop-shadow(0 0 8px rgba(212, 175, 55, 0.4));
+        }
+        
+        .logo-text {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 24px;
+            font-weight: 400;
+            letter-spacing: 0.2em;
+            color: var(--champagne);
+        }
+        
+        .logo-subtitle {
+            font-size: 10px;
+            letter-spacing: 0.3em;
+            color: var(--platinum-dim);
+            text-transform: uppercase;
+            margin-top: 4px;
+        }
+        
+        /* Navigation */
+        .nav-section {
+            flex: 1;
+        }
+        
+        .nav-label {
+            font-size: 10px;
+            letter-spacing: 0.25em;
+            color: var(--platinum-dim);
+            text-transform: uppercase;
+            margin-bottom: 16px;
+            padding-left: 16px;
+        }
+        
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 16px;
+            border-left: 1px solid transparent;
+            color: var(--platinum-dim);
+            text-decoration: none;
+            font-size: 14px;
+            letter-spacing: 0.05em;
+            transition: all 0.3s ease;
+            margin-bottom: 4px;
+        }
+        
+        .nav-item:hover {
+            color: var(--ivory);
+            border-left-color: rgba(212, 175, 55, 0.3);
+            background: rgba(212, 175, 55, 0.03);
+        }
+        
+        .nav-item.active {
+            color: var(--champagne);
+            border-left-color: var(--champagne);
+            background: rgba(212, 175, 55, 0.05);
+        }
+        
+        .nav-icon {
+            width: 20px;
+            height: 20px;
+            opacity: 0.7;
+        }
+        
+        .nav-item:hover .nav-icon,
+        .nav-item.active .nav-icon {
+            opacity: 1;
+        }
+        
+        /* Status Block */
+        .status-block {
+            border-top: 1px solid rgba(212, 175, 55, 0.1);
+            padding-top: 24px;
+            margin-top: auto;
+        }
+        
+        .status-title {
+            font-size: 10px;
+            letter-spacing: 0.25em;
+            color: var(--platinum-dim);
+            text-transform: uppercase;
+            margin-bottom: 16px;
+        }
+        
+        .status-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            font-size: 12px;
+        }
+        
+        .status-label {
+            color: var(--platinum-dim);
+        }
+        
+        .status-value {
+            color: var(--platinum);
+            font-variant-numeric: tabular-nums;
+        }
+        
+        .status-value.online {
+            color: var(--champagne);
+        }
+        
+        .status-dot {
+            width: 6px;
+            height: 6px;
+            background: var(--champagne);
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 8px;
+            box-shadow: 0 0 8px var(--champagne);
+            animation: pulse 2s ease-in-out infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        /* MAIN CONTENT */
+        .main-content {
+            padding: 48px;
+            background: var(--obsidian);
+            position: relative;
+        }
+        
+        /* Top Bar */
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 48px;
+            padding-bottom: 24px;
+            border-bottom: 1px solid rgba(212, 175, 55, 0.1);
+        }
+        
+        .page-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 42px;
+            font-weight: 300;
+            letter-spacing: 0.02em;
+            color: var(--ivory);
+        }
+        
+        .page-subtitle {
+            font-size: 12px;
+            color: var(--platinum-dim);
+            letter-spacing: 0.1em;
+            margin-top: 8px;
+        }
+        
+        .top-actions {
+            display: flex;
+            gap: 16px;
+            align-items: center;
+        }
+        
+        .datetime {
+            font-size: 12px;
+            color: var(--platinum-dim);
+            text-align: right;
+            line-height: 1.6;
+        }
+        
+        .action-btn {
+            background: transparent;
+            border: 1px solid var(--champagne);
+            color: var(--champagne);
+            padding: 12px 24px;
+            font-family: 'Satoshi', sans-serif;
+            font-size: 12px;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .action-btn:hover {
+            background: var(--champagne);
+            color: var(--obsidian);
+        }
+        
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 24px;
+            margin-bottom: 48px;
+        }
+        
+        .stat-card {
+            background: linear-gradient(135deg, var(--charcoal) 0%, var(--onyx) 100%);
+            border: 1px solid rgba(212, 175, 55, 0.1);
+            padding: 32px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        /* Corner accents */
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 24px;
+            height: 24px;
+            border-top: 1px solid var(--champagne);
+            border-left: 1px solid var(--champagne);
+            opacity: 0.5;
+        }
+        
+        .stat-card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 24px;
+            height: 24px;
+            border-top: 1px solid var(--champagne);
+            border-right: 1px solid var(--champagne);
+            opacity: 0.5;
+        }
+        
+        .stat-label {
+            font-size: 11px;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: var(--platinum-dim);
+            margin-bottom: 16px;
+        }
+        
+        .stat-value {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 48px;
+            font-weight: 300;
+            color: var(--ivory);
+            line-height: 1;
+        }
+        
+        .stat-value span {
+            font-size: 24px;
+            color: var(--platinum-dim);
+        }
+        
+        .stat-change {
+            font-size: 12px;
+            margin-top: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .stat-change.positive {
+            color: var(--champagne);
+        }
+        
+        .stat-change.negative {
+            color: var(--rose-bronze);
+        }
+        
+        /* Content Grid */
+        .content-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 24px;
+        }
+        
+        /* Panel Styles */
+        .panel {
+            background: linear-gradient(135deg, var(--charcoal) 0%, var(--onyx) 100%);
+            border: 1px solid rgba(212, 175, 55, 0.1);
+            position: relative;
+        }
+        
+        .panel-header {
+            padding: 24px 32px;
+            border-bottom: 1px solid rgba(212, 175, 55, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .panel-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 20px;
+            font-weight: 400;
+            letter-spacing: 0.05em;
+            color: var(--ivory);
+        }
+        
+        .panel-badge {
+            font-size: 10px;
+            letter-spacing: 0.15em;
+            color: var(--champagne);
+            border: 1px solid var(--champagne);
+            padding: 4px 12px;
+        }
+        
+        .panel-body {
+            padding: 24px 32px;
+        }
+        
+        /* Leaderboard */
+        .leaderboard-item {
+            display: flex;
+            align-items: center;
+            padding: 16px 0;
+            border-bottom: 1px solid rgba(212, 175, 55, 0.05);
+        }
+        
+        .leaderboard-item:last-child {
+            border-bottom: none;
+        }
+        
+        .leaderboard-rank {
+            width: 32px;
+            font-size: 14px;
+            color: var(--platinum-dim);
+            font-variant-numeric: tabular-nums;
+        }
+        
+        .leaderboard-rank.gold {
+            color: var(--champagne);
+            font-weight: 600;
+        }
+        
+        .leaderboard-rank.silver {
+            color: var(--platinum);
+        }
+        
+        .leaderboard-rank.bronze {
+            color: var(--rose-bronze);
+        }
+        
+        .leaderboard-divider {
+            width: 1px;
+            height: 40px;
+            background: rgba(212, 175, 55, 0.1);
+            margin: 0 16px;
+        }
+        
+        .leaderboard-info {
+            flex: 1;
+        }
+        
+        .leaderboard-name {
+            font-size: 14px;
+            color: var(--ivory);
+            margin-bottom: 4px;
+        }
+        
+        .leaderboard-role {
+            font-size: 10px;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: var(--platinum-dim);
+        }
+        
+        .leaderboard-score {
+            text-align: right;
+        }
+        
+        .leaderboard-value {
+            font-size: 18px;
+            color: var(--champagne);
+            font-variant-numeric: tabular-nums;
+        }
+        
+        .leaderboard-label {
+            font-size: 10px;
+            color: var(--platinum-dim);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+        
+        /* Activity Log */
+        .log-item {
+            display: flex;
+            gap: 16px;
+            padding: 12px 0;
+            font-size: 13px;
+            color: var(--platinum);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.02);
+        }
+        
+        .log-time {
+            font-size: 11px;
+            color: var(--platinum-dim);
+            min-width: 60px;
+            font-variant-numeric: tabular-nums;
+        }
+        
+        .log-type {
+            font-weight: 500;
+            min-width: 140px;
+        }
+        
+        .log-type.contrib {
+            color: var(--champagne-light);
+        }
+        
+        .log-type.verify {
+            color: var(--rose-bronze);
+        }
+        
+        .log-type.complete {
+            color: var(--champagne);
+        }
+        
+        .log-actor {
+            color: var(--platinum-dim);
+        }
+        
+        /* Right Column */
+        .right-column {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+        
+        .domain-list {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        
+        .domain-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .domain-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .domain-icon {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            color: var(--champagne);
+            font-size: 14px;
+        }
+        
+        .domain-name {
+            font-size: 14px;
+            color: var(--ivory);
+        }
+        
+        .domain-count {
+            font-size: 14px;
+            color: var(--platinum);
+            font-variant-numeric: tabular-nums;
+        }
+        
+        .domain-bar {
+            width: 100%;
+            height: 4px;
+            background: var(--charcoal);
+            margin-top: 8px;
+            border-radius: 2px;
+            overflow: hidden;
+        }
+        
+        .domain-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--champagne), var(--champagne-light));
+            border-radius: 2px;
+            transition: width 0.5s ease;
+        }
+        
+        /* Ticket List */
+        .ticket-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .ticket-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px;
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(212, 175, 55, 0.05);
+            transition: all 0.3s ease;
+        }
+        
+        .ticket-item:hover {
+            border-color: rgba(212, 175, 55, 0.2);
+            background: rgba(0, 0, 0, 0.3);
+        }
+        
+        .ticket-title {
+            font-size: 13px;
+            color: var(--ivory);
+            margin-bottom: 4px;
+        }
+        
+        .ticket-meta {
+            font-size: 11px;
+            color: var(--platinum-dim);
+        }
+        
+        .ticket-status {
+            font-size: 10px;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            padding: 4px 12px;
+            border: 1px solid;
+        }
+        
+        .ticket-status.open {
+            color: var(--champagne);
+            border-color: var(--champagne);
+        }
+        
+        .ticket-status.completed {
+            color: var(--platinum);
+            border-color: var(--platinum-dim);
+        }
+        
+        .ticket-status.claimed {
+            color: var(--rose-bronze);
+            border-color: var(--rose-bronze);
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- SIDEBAR -->
+        <aside class="sidebar">
+            <div class="logo-section">
+                <div class="logo-diamond">
+                    <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" style="stop-color:#f0dc8c"/>
+                                <stop offset="100%" style="stop-color:#d4af37"/>
+                            </linearGradient>
+                        </defs>
+                        <polygon points="24,4 44,24 24,44 4,24" stroke="url(#goldGrad)" stroke-width="2" fill="none"/>
+                        <polygon points="24,14 34,24 24,34 14,24" stroke="url(#goldGrad)" stroke-width="1" fill="none"/>
+                        <circle cx="24" cy="24" r="3" fill="#d4af37"/>
+                    </svg>
+                </div>
+                <div>
+                    <div class="logo-text">FORTRESS</div>
+                    <div class="logo-subtitle">Meritocratic DAO</div>
+                </div>
+            </div>
+            
+            <div class="nav-section">
+                <div class="nav-label">Navigation</div>
+                <a href="#" class="nav-item active">
+                    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <rect x="3" y="3" width="7" height="7"/>
+                        <rect x="14" y="3" width="7" height="7"/>
+                        <rect x="3" y="14" width="7" height="7"/>
+                        <rect x="14" y="14" width="7" height="7"/>
+                    </svg>
+                    Dashboard
+                </a>
+                <a href="#" class="nav-item">
+                    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                        <circle cx="9" cy="7" r="4"/>
+                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                    </svg>
+                    Squads
+                </a>
+                <a href="#" class="nav-item">
+                    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                        <polyline points="14,2 14,8 20,8"/>
+                        <line x1="16" y1="13" x2="8" y2="13"/>
+                        <line x1="16" y1="17" x2="8" y2="17"/>
+                    </svg>
+                    Ledger
+                </a>
+                <a href="#" class="nav-item">
+                    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <circle cx="12" cy="12" r="10"/>
+                        <path d="M12 6v6l4 2"/>
+                    </svg>
+                    Timeline
+                </a>
+                <a href="#" class="nav-item">
+                    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/>
+                    </svg>
+                    Rankings
+                </a>
+            </div>
+            
+            <div class="status-block">
+                <div class="status-title">System Status</div>
+                <div class="status-item">
+                    <span class="status-label">Network</span>
+                    <span class="status-value online"><span class="status-dot"></span>Online</span>
+                </div>
+                <div class="status-item">
+                    <span class="status-label">Events</span>
+                    <span class="status-value">1,247</span>
+                </div>
+                <div class="status-item">
+                    <span class="status-label">Uptime</span>
+                    <span class="status-value">99.9%</span>
+                </div>
+                <div class="status-item">
+                    <span class="status-label">Version</span>
+                    <span class="status-value">v0.4.2</span>
+                </div>
+            </div>
+        </aside>
+        
+        <!-- MAIN CONTENT -->
+        <main class="main-content">
+            <div class="top-bar">
+                <div>
+                    <h1 class="page-title">Command Center</h1>
+                    <div class="page-subtitle">Fortress Merit Dashboard</div>
+                </div>
+                <div class="top-actions">
+                    <div class="datetime">
+                        <div id="date">February 13, 2025</div>
+                        <div id="time">14:32:07</div>
+                    </div>
+                    <button class="action-btn">+ New Proposal</button>
+                </div>
+            </div>
+            
+            <!-- Stats Grid -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-label">Total Actors</div>
+                    <div class="stat-value">32</div>
+                    <div class="stat-change positive">▲ 12% from last epoch</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Active Tickets</div>
+                    <div class="stat-value">41</div>
+                    <div class="stat-change positive">▲ 8 this week</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">REP Staked</div>
+                    <div class="stat-value">634 <span>REP</span></div>
+                    <div class="stat-change positive">▲ 23% lockup rate</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Completion Rate</div>
+                    <div class="stat-value">89<span>%</span></div>
+                    <div class="stat-change positive">▲ 5% improvement</div>
+                </div>
+            </div>
+            
+            <!-- Content Grid -->
+            <div class="content-grid">
+                <div class="left-column">
+                    <!-- Leaderboard Panel -->
+                    <div class="panel">
+                        <div class="panel-header">
+                            <h2 class="panel-title">REP Leaders</h2>
+                            <span class="panel-badge">TOP 5</span>
+                        </div>
+                        <div class="panel-body">
+                            <div class="leaderboard-item">
+                                <span class="leaderboard-rank gold">01</span>
+                                <div class="leaderboard-divider"></div>
+                                <div class="leaderboard-info">
+                                    <div class="leaderboard-name">e394ace6...b37</div>
+                                    <div class="leaderboard-role">ARCHITECT</div>
+                                </div>
+                                <div class="leaderboard-score">
+                                    <div class="leaderboard-value">1,000</div>
+                                    <div class="leaderboard-label">Total REP</div>
+                                </div>
+                            </div>
+                            <div class="leaderboard-item">
+                                <span class="leaderboard-rank silver">02</span>
+                                <div class="leaderboard-divider"></div>
+                                <div class="leaderboard-info">
+                                    <div class="leaderboard-name">e05e2a7c...f9</div>
+                                    <div class="leaderboard-role">ARCHITECT</div>
+                                </div>
+                                <div class="leaderboard-score">
+                                    <div class="leaderboard-value">1,000</div>
+                                    <div class="leaderboard-label">Total REP</div>
+                                </div>
+                            </div>
+                            <div class="leaderboard-item">
+                                <span class="leaderboard-rank bronze">03</span>
+                                <div class="leaderboard-divider"></div>
+                                <div class="leaderboard-info">
+                                    <div class="leaderboard-name">6860abcf...59</div>
+                                    <div class="leaderboard-role">GUARDIAN</div>
+                                </div>
+                                <div class="leaderboard-score">
+                                    <div class="leaderboard-value">1,000</div>
+                                    <div class="leaderboard-label">Total REP</div>
+                                </div>
+                            </div>
+                            <div class="leaderboard-item">
+                                <span class="leaderboard-rank">04</span>
+                                <div class="leaderboard-divider"></div>
+                                <div class="leaderboard-info">
+                                    <div class="leaderboard-name">7a2f1c8d...a1</div>
+                                    <div class="leaderboard-role">SCOUT</div>
+                                </div>
+                                <div class="leaderboard-score">
+                                    <div class="leaderboard-value">785</div>
+                                    <div class="leaderboard-label">Total REP</div>
+                                </div>
+                            </div>
+                            <div class="leaderboard-item">
+                                <span class="leaderboard-rank">05</span>
+                                <div class="leaderboard-divider"></div>
+                                <div class="leaderboard-info">
+                                    <div class="leaderboard-name">3d9e5b2f...c8</div>
+                                    <div class="leaderboard-role">SCOUT</div>
+                                </div>
+                                <div class="leaderboard-score">
+                                    <div class="leaderboard-value">654</div>
+                                    <div class="leaderboard-label">Total REP</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Activity Log -->
+                    <div class="panel" style="margin-top: 24px;">
+                        <div class="panel-header">
+                            <h2 class="panel-title">System Events</h2>
+                            <span class="panel-badge">LIVE</span>
+                        </div>
+                        <div class="panel-body">
+                            <div class="log-item">
+                                <span class="log-time">14:28:03</span>
+                                <span class="log-type complete">PROJECT_COMPLETED</span>
+                                <span class="log-actor">by 7a2f1c8d...</span>
+                            </div>
+                            <div class="log-item">
+                                <span class="log-time">14:15:22</span>
+                                <span class="log-type verify">VERIFICATION_SUBMITTED</span>
+                                <span class="log-actor">by e394ace6...</span>
+                            </div>
+                            <div class="log-item">
+                                <span class="log-time">13:52:18</span>
+                                <span class="log-type contrib">CONTRIBUTION_SUBMITTED</span>
+                                <span class="log-actor">by 3d9e5b2f...</span>
+                            </div>
+                            <div class="log-item">
+                                <span class="log-time">13:41:07</span>
+                                <span class="log-type complete">TICKET_CLAIMED</span>
+                                <span class="log-actor">by e05e2a7c...</span>
+                            </div>
+                            <div class="log-item">
+                                <span class="log-time">13:28:44</span>
+                                <span class="log-type verify">VERIFICATION_SUBMITTED</span>
+                                <span class="log-actor">by 6860abcf...</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Right Column -->
+                <div class="right-column">
+                    <!-- Domain Distribution -->
+                    <div class="panel">
+                        <div class="panel-header">
+                            <h2 class="panel-title">Domain Distribution</h2>
+                        </div>
+                        <div class="panel-body">
+                            <div class="domain-list">
+                                <div>
+                                    <div class="domain-item">
+                                        <div class="domain-info">
+                                            <div class="domain-icon">◇</div>
+                                            <span class="domain-name">Backend</span>
+                                        </div>
+                                        <span class="domain-count">12</span>
+                                    </div>
+                                    <div class="domain-bar">
+                                        <div class="domain-bar-fill" style="width: 37.5%"></div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="domain-item">
+                                        <div class="domain-info">
+                                            <div class="domain-icon">○</div>
+                                            <span class="domain-name">Frontend</span>
+                                        </div>
+                                        <span class="domain-count">10</span>
+                                    </div>
+                                    <div class="domain-bar">
+                                        <div class="domain-bar-fill" style="width: 31.25%"></div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="domain-item">
+                                        <div class="domain-info">
+                                            <div class="domain-icon">□</div>
+                                            <span class="domain-name">DevOps</span>
+                                        </div>
+                                        <span class="domain-count">6</span>
+                                    </div>
+                                    <div class="domain-bar">
+                                        <div class="domain-bar-fill" style="width: 18.75%"></div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="domain-item">
+                                        <div class="domain-info">
+                                            <div class="domain-icon">△</div>
+                                            <span class="domain-name">Security</span>
+                                        </div>
+                                        <span class="domain-count">4</span>
+                                    </div>
+                                    <div class="domain-bar">
+                                        <div class="domain-bar-fill" style="width: 12.5%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Recent Tickets -->
+                    <div class="panel">
+                        <div class="panel-header">
+                            <h2 class="panel-title">Active Tickets</h2>
+                        </div>
+                        <div class="panel-body">
+                            <div class="ticket-list">
+                                <div class="ticket-item">
+                                    <div>
+                                        <div class="ticket-title">Implement OAuth flow</div>
+                                        <div class="ticket-meta">50 REP · 3 days left</div>
+                                    </div>
+                                    <span class="ticket-status open">Open</span>
+                                </div>
+                                <div class="ticket-item">
+                                    <div>
+                                        <div class="ticket-title">API Documentation</div>
+                                        <div class="ticket-meta">35 REP · 5 days left</div>
+                                    </div>
+                                    <span class="ticket-status claimed">Claimed</span>
+                                </div>
+                                <div class="ticket-item">
+                                    <div>
+                                        <div class="ticket-title">Database Migration</div>
+                                        <div class="ticket-meta">75 REP · Completed</div>
+                                    </div>
+                                    <span class="ticket-status completed">Done</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <script>
+        // Update datetime
+        function updateDateTime() {
+            const now = new Date();
+            const dateEl = document.getElementById('date');
+            const timeEl = document.getElementById('time');
+            
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            dateEl.textContent = now.toLocaleDateString('en-US', options);
+            
+            const timeOptions = { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false };
+            timeEl.textContent = now.toLocaleTimeString('en-US', timeOptions);
+        }
+        
+        updateDateTime();
+        setInterval(updateDateTime, 1000);
+    </script>
+</body>
+</html>
