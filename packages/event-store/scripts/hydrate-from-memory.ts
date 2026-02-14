@@ -10,7 +10,22 @@
  */
 
 import { prisma } from '@fated/db';
-import { InMemoryEventStore, XpVector } from '../src/index';
+import { InMemoryEventStore, XpVector, AppEvent } from '../src/index';
+
+function getActorId(event: AppEvent): string {
+    switch (event.type) {
+        case 'CONTRIBUTION_SUBMITTED':
+            return event.payload.userId;
+        case 'VERIFICATION_SUBMITTED':
+            return event.payload.verifierId;
+        case 'PROJECT_CREATED':
+        case 'SQUAD_ASSIGNED':
+        case 'PROJECT_COMPLETED':
+            return 'SYSTEM';
+        default:
+            return 'UNKNOWN';
+    }
+}
 
 async function main() {
     console.log('Starting hydration from memory to SQLite...');
@@ -34,6 +49,7 @@ async function main() {
             await prisma.event.createMany({
                 data: events.map(event => ({
                     id: event.id,
+                    actorId: getActorId(event), // Fix: actorId is required by schema
                     streamId: event.streamId,
                     timestamp: new Date(event.timestamp),
                     type: event.type,
@@ -47,27 +63,35 @@ async function main() {
 
         // Upsert actor states
         const actorEntries = Object.entries(state) as [string, XpVector][];
-        for (const [actorId, xpVector] of actorEntries) {
-            await prisma.actorState.upsert({
-                where: { actorId },
-                update: {
-                    currentXp: xpVector.total,
-                    pendingXp: xpVector.pending,
-                    contributions: xpVector.contributions,
-                    lastActivity: xpVector.lastActivity,
-                    lastUpdated: new Date()
-                },
-                create: {
-                    actorId,
-                    currentXp: xpVector.total,
-                    pendingXp: xpVector.pending,
-                    contributions: xpVector.contributions,
-                    lastActivity: xpVector.lastActivity,
-                    lastUpdated: new Date(),
-                    decayRate: 0.0,
-                    roleHistory: '[]'
-                }
-            });
+        const BATCH_SIZE = 50; // Batch size to optimize DB throughput while respecting connection limits
+
+        for (let i = 0; i < actorEntries.length; i += BATCH_SIZE) {
+            const batch = actorEntries.slice(i, i + BATCH_SIZE);
+            await Promise.all(batch.map(([actorId, xpVector]) =>
+                prisma.actorState.upsert({
+                    where: { actorId },
+                    update: {
+                        currentXp: xpVector.totalXP, // Fix: correct property name
+                        pendingXp: xpVector.pendingXP, // Fix: correct property name
+                        contributions: 0, // Fix: contributions property deprecated/removed from XpVector
+                        lastActivity: xpVector.lastActivity,
+                        lastUpdated: new Date(),
+                        roleHistory: JSON.stringify(xpVector.roleHistory),
+                        successRate: JSON.stringify(xpVector.successRate)
+                    },
+                    create: {
+                        actorId,
+                        currentXp: xpVector.totalXP, // Fix: correct property name
+                        pendingXp: xpVector.pendingXP, // Fix: correct property name
+                        contributions: 0, // Fix: contributions property deprecated/removed from XpVector
+                        lastActivity: xpVector.lastActivity,
+                        lastUpdated: new Date(),
+                        decayRate: 0.0,
+                        roleHistory: JSON.stringify(xpVector.roleHistory),
+                        successRate: JSON.stringify(xpVector.successRate)
+                    }
+                })
+            ));
         }
         console.log(`Upserted ${actorEntries.length} actors`);
 
