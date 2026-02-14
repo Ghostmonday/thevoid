@@ -54,7 +54,6 @@ const hasSpecialty = (xp: XpVector, targetDomain: Specialty): boolean => {
 const getEffectiveScore = (
     xp: XpVector,
     roleXP: number,
-    targetRole: PartyRole,
     targetDomain?: Specialty
 ): number => {
     let score = roleXP;
@@ -102,7 +101,7 @@ export const formParty = (
             if (pool.has(id)) continue;
 
             const baseScore = scorer(xp);
-            const effectiveScore = getEffectiveScore(xp, baseScore, role, targetDomain);
+            const effectiveScore = getEffectiveScore(xp, baseScore, targetDomain);
 
             if (effectiveScore > bestScore) {
                 bestScore = effectiveScore;
