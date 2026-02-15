@@ -1,0 +1,55 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model ActorState {
+  actorId      String   @id
+  currentRep  Int      @default(0)
+  stakedRep   Int      @default(0)
+  currentXp   Int      @default(0)
+  pendingXp   Int      @default(0)
+  contributions Int     @default(0)
+  decayRate   Float    @default(0.01)
+  lastActivity DateTime?
+  lastUpdated DateTime @default(now())
+  roleHistory String   @default("[]")
+  successRate String   @default("{}")
+}
+
+model Stake {
+  id          String   @id @default(uuid())
+  actorId     String
+  amount      Int
+  ticketId    String?
+  status      String   @default("ACTIVE")
+  createdAt   DateTime @default(now())
+  releasedAt  DateTime?
+}
+
+model Ticket {
+  id            String   @id @default(uuid())
+  workPackageId String
+  title         String
+  description   String?
+  bondRequired  Int
+  claimedBy     String?
+  claimedAt     DateTime?
+  deadline      DateTime
+  completedAt   DateTime?
+  status        String   @default("OPEN")
+  createdAt     DateTime @default(now())
+}
+
+model Event {
+  id        String   @id @default(uuid())
+  actorId   String
+  streamId  String
+  timestamp DateTime @default(now())
+  type      String
+  payload   String
+}
