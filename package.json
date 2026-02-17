@@ -19,8 +19,8 @@
     "build:web": "npm run build --workspace=apps/web",
     "build:api": "npm run build --workspace=apps/api",
     "start": "npm run start --workspace=apps/web",
-    "start:api": "npm run start --workspace=apps/api",
-    "test": "turbo test",
+    "start:api": "dotenv -e .env -- pnpm --filter @fated/simple-api dev",
+    "test": "dotenv -e .env -- turbo test",
     "lint": "npm run lint --workspace=apps/web",
     "clean": "rm -rf node_modules **/*/node_modules"
   },
@@ -33,6 +33,16 @@
     "vitest": "^1.0.0"
   },
   "dependencies": {
-    "@prisma/client": "^5.22.0"
+    "@prisma/client": "^5.22.0",
+    "helmet": "^7.1.0",
+    "cors": "^2.8.5",
+    "express-rate-limit": "^7.1.5",
+    "xss-clean": "^0.1.4"
+  },
+  "pnpm": {
+    "audit": {
+      "level": "high",
+      "registry": "https://registry.npmjs.org"
+    }
   }
 }
