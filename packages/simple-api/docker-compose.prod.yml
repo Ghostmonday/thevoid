@@ -1,0 +1,63 @@
+# The Void API - Production Docker Compose
+# Usage: docker-compose -f docker-compose.prod.yml up -d
+
+services:
+  void-api:
+    build:
+      context: ../..
+      dockerfile: packages/simple-api/Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=postgresql://postgres:${POSTGRES_PASSWORD}@void-db:5432/void
+      - PORT=3000
+    depends_on:
+      void-db:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  void-db:
+    image: postgres:16-alpine
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=void
+    volumes:
+      - void-data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d void"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+volumes:
+  void-data:
+
+# To deploy on Railway:
+# 1. Connect GitHub repo to Railway
+# 2. Add PostgreSQL plugin
+# 3. Set environment variables in Railway dashboard
+# 4. Deploy from Railway dashboard or `railway up`
+
+# To deploy on Render:
+# 1. Connect GitHub repo to Render
+# 2. Create PostgreSQL instance
+# 3. Set DATABASE_URL from Render's PostgreSQL connection string
+# 4. Deploy from Render dashboard
+
+# To deploy on Heroku:
+# 1. heroku create void-api
+# 2. heroku addons:add heroku-postgresql
+# 3. Set DATABASE_URL from Heroku config
+# 4. git push heroku main

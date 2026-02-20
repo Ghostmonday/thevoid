@@ -1,0 +1,59 @@
+# The Void API - Production Dockerfile
+# Optimized for production deployment
+
+FROM node:20-alpine AS base
+
+# Install pnpm
+RUN corepack enable && corepack prepare pnpm@latest --activate
+
+# Stage 1: Dependencies
+FROM base AS deps
+WORKDIR /app
+
+# Copy package files
+COPY package.json pnpm-lock.yaml ./
+COPY prisma ./prisma/
+
+# Install dependencies
+RUN pnpm install --frozen-lockfile --prod=false
+
+# Generate Prisma Client
+RUN pnpm prisma generate
+
+# Stage 2: Builder
+FROM base AS builder
+WORKDIR /app
+
+COPY --from=deps /app/node_modules ./node_modules
+COPY . .
+
+# Build TypeScript
+RUN pnpm build
+
+# Stage 3: Runner
+FROM base AS runner
+WORKDIR /app
+
+ENV NODE_ENV=production
+
+# Create non-root user
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 void
+
+# Copy built artifacts
+COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
+COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
+COPY --from=builder /app/package.json ./
+
+USER void
+
+# Expose port
+EXPOSE 3000
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+  CMD wget --spider -q http://localhost:3000/health || exit 1
+
+# Start server
+CMD ["node", "dist/index.js"]
