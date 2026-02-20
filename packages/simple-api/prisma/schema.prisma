@@ -25,7 +25,8 @@ model Stake {
   id          String   @id @default(uuid())
   actorId     String
   amount      Int
-  ticketId    String?
+  ticketId    String?  @unique
+  ticket      Ticket?  @relation(fields: [ticketId], references: [id])
   status      String   @default("ACTIVE")
   createdAt   DateTime @default(now())
   releasedAt  DateTime?
@@ -43,6 +44,7 @@ model Ticket {
   completedAt   DateTime?
   status        String   @default("OPEN")
   createdAt     DateTime @default(now())
+  stake         Stake?
 }
 
 model Event {

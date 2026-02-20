@@ -139,7 +139,7 @@ fastify.post('/complete', async (request: any) => {
   const ticket = await prisma.ticket.findUnique({ 
     where: { id: ticketId },
     include: { stake: true }
-  });
+  }) as any;
   if (!ticket) return { error: 'Ticket not found' };
   if (ticket.status !== 'CLAIMED') return { error: 'Ticket not claimed' };
   if (!ticket.claimedBy || !ticket.stake) return { error: 'Invalid ticket state' };
@@ -175,6 +175,36 @@ fastify.get('/leaderboard', async () => {
     take: 50
   });
   return { leaderboard: actors };
+});
+
+// Matchmaker endpoint (stub for compatibility)
+fastify.post('/api/match', async (request: any) => {
+  const { project_requirements, available_developers } = request.body || {};
+  if (!project_requirements || !available_developers) {
+    return { error: 'project_requirements and available_developers required' };
+  }
+  // Simple matching algorithm
+  const totalSlots = Object.values(project_requirements).reduce((a: number, b: any) => a + (typeof b === 'number' ? b : 0), 0);
+  const assignments = available_developers.slice(0, Math.min(totalSlots, available_developers.length));
+  return { assignments };
+});
+
+// GitHub webhook endpoint (stub for compatibility)
+fastify.post('/webhooks/github', async (request: any) => {
+  const { commits, sender } = request.body || {};
+  if (!commits || !Array.isArray(commits)) {
+    return { received: true };
+  }
+  // Process commits and award XP
+  for (const commit of commits) {
+    const author = commit.author?.username || sender?.login || 'unknown';
+    await prisma.actorState.upsert({
+      where: { actorId: author },
+      update: { currentXp: { increment: 10 } },
+      create: { actorId: author, currentRep: 100, currentXp: 10 }
+    });
+  }
+  return { received: true, processed: commits.length };
 });
 
 // Start server
