@@ -3,6 +3,7 @@
  * Minimal working API for The Void
  */
 
+import 'dotenv/config';
 import { PrismaClient } from '@prisma/client';
 import Fastify from 'fastify';
 
