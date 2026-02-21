@@ -33,7 +33,7 @@ if (existsSync(envPath)) {
             process.env[match[1].trim()] = value;
         }
     });
-    console.log('[ENV] Loaded DATABASE_URL:', process.env.DATABASE_URL);
+    console.log('[ENV] Loaded DATABASE_URL:', process.env.DATABASE_URL ? '***configured***' : 'NOT SET');
 }
 else {
     console.log('[ENV] No .env file found at', envPath);

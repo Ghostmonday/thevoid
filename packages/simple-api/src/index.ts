@@ -183,7 +183,8 @@ fastify.post('/waitlist', async (request: any) => {
   if (!email) return { error: 'email required' };
   
   // Basic email validation
-  if (!email.includes('@')) return { error: 'Invalid email format' };
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email) || email.length > 255) return { error: 'Invalid email format' };
   
   try {
     let entry = await prisma.waitlist.findUnique({ where: { email } });

@@ -36,12 +36,15 @@ if (existsSync(envPath)) {
       process.env[match[1].trim()] = value;
     }
   });
-  console.log('[ENV] Loaded DATABASE_URL:', process.env.DATABASE_URL);
+  console.log('[ENV] Loaded DATABASE_URL:', process.env.DATABASE_URL ? '***configured***' : 'NOT SET');
 } else {
   console.log('[ENV] No .env file found at', envPath);
 }
 
-import Fastify, { FastifyRequest, FastifyInstance } from 'fastify';
+import Fastify, { FastifyRequest, FastifyReply, FastifyInstance } from 'fastify';
+import fastifyRateLimit from '@fastify/rate-limit';
+import fastifyCors from '@fastify/cors';
+import fastifyHelmet from '@fastify/helmet';
 import { randomUUID } from 'crypto';
 import { PrismaClient } from '@prisma/client';
 
@@ -76,8 +79,43 @@ import {
 
 const fastify = Fastify({ logger: true });
 
+// Security middleware
+await fastify.register(fastifyHelmet);
+await fastify.register(fastifyCors, {
+  origin: process.env.CORS_ORIGIN || 'http://localhost:3001',
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+});
+await fastify.register(fastifyRateLimit, {
+  max: 100,
+  timeWindow: '1 minute',
+});
+
 const prisma = new PrismaClient();
 const store = new InMemoryEventStore(true);
+
+// Admin auth hook for /admin/* routes
+function requireAdminAuth(request: FastifyRequest, reply: FastifyReply, done: () => void) {
+  const adminSecret = process.env.ADMIN_SECRET;
+  if (!adminSecret) {
+    reply.status(503).send({ error: 'Admin endpoint not configured' });
+    return;
+  }
+  const authHeader = request.headers['x-admin-key'] || request.headers['authorization'];
+  if (authHeader !== adminSecret && authHeader !== `Bearer ${adminSecret}`) {
+    reply.status(401).send({ error: 'Unauthorized' });
+    return;
+  }
+  done();
+}
+
+// Register admin auth for all /admin/* routes
+fastify.addHook('onRequest', (request, reply, done) => {
+  if (request.url.startsWith('/admin')) {
+    requireAdminAuth(request, reply, done);
+  } else {
+    done();
+  }
+});
 
 // ============================================
 // ERROR HANDLER
@@ -99,7 +137,7 @@ fastify.setErrorHandler((error: any, request: FastifyRequest, reply: any) => {
   }
 
   return reply.status(error.statusCode || 500).send({
-    error: error.message || 'Operation failed'
+    error: process.env.NODE_ENV === 'production' ? 'Internal server error' : (error.message || 'Operation failed')
   });
 });
 
