@@ -250,6 +250,102 @@ Receive GitHub events (push, PR, review).
 
 ---
 
+## Waitlist
+
+### POST /waitlist
+
+Join the waitlist.
+
+**Request:**
+```json
+{
+  "email": "developer@example.com",
+  "name": "Jane Developer",
+  "github": "janedev",
+  "source": "landing"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Joined waitlist!",
+  "waitlist": {
+    "email": "developer@example.com",
+    "name": "Jane Developer",
+    "github": "janedev",
+    "status": "PENDING",
+    "createdAt": "2026-02-20T11:00:00.000Z"
+  }
+}
+```
+
+### GET /waitlist/:email
+
+Check waitlist status by email.
+
+**Response:**
+```json
+{
+  "waitlist": {
+    "email": "developer@example.com",
+    "name": "Jane Developer",
+    "github": "janedev",
+    "status": "PENDING",
+    "createdAt": "2026-02-20T11:00:00.000Z"
+  }
+}
+```
+
+### GET /waitlist-count
+
+Get public waitlist count (excludes converted).
+
+**Response:**
+```json
+{
+  "count": 1247
+}
+```
+
+## Matchmaker (API)
+
+### POST /api/match
+
+Match available developers to project requirements (stub endpoint).
+
+**Request:**
+```json
+{
+  "project_requirements": {
+    "BACKEND": 2,
+    "FRONTEND": 1,
+    "DEVOPS": 1
+  },
+  "available_developers": [
+    { "id": "user-1", "skills": ["BACKEND", "DEVOPS"] },
+    { "id": "user-2", "skills": ["FRONTEND"] },
+    { "id": "user-3", "skills": ["BACKEND"] }
+  ]
+}
+```
+
+**Response:**
+```json
+{
+  "assignments": [
+    { "id": "user-1" },
+    { "id": "user-2" },
+    { "id": "user-3" }
+  ]
+}
+```
+
+**Note:** This is a compatibility stub. The full team matching logic is in `@fated/matchmaker` package.
+
+---
+
 ## Ticket Status Values
 
 | Status | Description |

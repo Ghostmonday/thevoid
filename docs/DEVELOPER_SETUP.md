@@ -172,8 +172,32 @@ pnpm build
 pnpm --filter @fated/types exec tsc --watch
 ```
 
+## Features
+
+### Waitlist System
+The platform includes a waitlist for early access:
+```bash
+# Join waitlist
+curl -X POST http://localhost:3000/waitlist \
+  -H "Content-Type: application/json" \
+  -d '{"email": "dev@example.com", "name": "Your Name", "github": "yourhandle"}'
+
+# Check status
+curl http://localhost:3000/waitlist/dev@example.com
+
+# Get total count
+curl http://localhost:3000/waitlist-count
+```
+
+### Reaper (Automated Slash)
+The Reaper runs automatically to slash overdue stakes. For manual triggering:
+```bash
+# The Reaper runs on a cron interval; manual trigger endpoint TBD
+```
+
 ## Next Steps
 
 - Read [README.md](../README.md) for architecture overview
-- Check [API Documentation](../README.md#api-surface) for endpoint details
+- Check [API Documentation](./API.md) for endpoint details
+- Explore [TEAM_MATCHING.md](./TEAM_MATCHING.md) for matching algorithm details
 - Explore the `packages/` directory for domain logic
