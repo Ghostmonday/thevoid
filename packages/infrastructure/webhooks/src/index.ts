@@ -22,7 +22,7 @@ export const GITHUB_WEBHOOK_SECRET = process.env.GITHUB_WEBHOOK_SECRET || DEFAUL
 export function verifyGitHubSignature(
   payload: string,
   signature: string,
-  secret: string = GITHUB_WEBHOOK_SECRET
+  secret: string | undefined = GITHUB_WEBHOOK_SECRET
 ): boolean {
   // In production, require a valid secret
   if (process.env.NODE_ENV === 'production' && !secret) {

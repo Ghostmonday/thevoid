@@ -54,7 +54,7 @@ async function runSimulation() {
 
             return {
                 name: agents.find(a => a.id === userId)?.name,
-                totalXP: xp.total,
+                totalXP: xp.totalXP,
                 daysSilent: daysSilent,
                 status: daysSilent > 30 ? '⚠️ DECAYING' : '✅ ACTIVE'
             };

@@ -50,6 +50,7 @@ const createGeneralist = (): TestUser => {
             roleHistory: {
                 BUILDER: { FRONTEND: 25, BACKEND: 25 },  // Some BACKEND XP
             },
+            successRate: { BUILDER: 0.8 },
             lastActivity: new Date()
         }
     };
@@ -69,6 +70,7 @@ const createSpecialist = (): TestUser => {
             roleHistory: {
                 BUILDER: { BACKEND: 80 }  // Deep BACKEND specialization
             },
+            successRate: { BUILDER: 0.95 },
             lastActivity: new Date()
         }
     };
